@@ -55,7 +55,7 @@ export default function Dashboard({
       <Sidebar activeView={currentView} onViewChange={onViewChange} />
 
       {/* Main Container Wrapper */}
-      <div className="sm:pl-64 transition-all duration-200">
+      <div className="w-full overflow-x-hidden sm:pl-64 transition-all duration-200">
         {/* TOP SECTION: Hero Banner Container */}
         <div
           className="relative bg-cover bg-no-repeat border-b border-slate-200 py-20"
