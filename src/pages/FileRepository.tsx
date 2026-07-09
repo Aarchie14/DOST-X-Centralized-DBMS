@@ -1,0 +1,186 @@
+import { Navbar } from "../components/layout/Navbar";
+import { Sidebar } from "../components/layout/Sidebar";
+import { TableToolbar } from "../components/common/TableToolbar";
+import { FileUploadZone } from "../components/common/FileUploadZone";
+import { FileTable } from "../components/common/FileTable";
+import { Toast, type ToastNotification } from "../components/common/Toast";
+import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal"; // Import your modal
+import { useState } from "react";
+
+export default function FileRepository({
+  onViewChange,
+  currentView,
+}: {
+  onViewChange: (view: string) => void;
+  currentView: string;
+}) {
+  // 1. STATE HOOKS
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDepartment, setSelectedDepartment] =
+    useState("All department");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [notification, setNotification] = useState<ToastNotification | null>(
+    null,
+  );
+
+  // State for the delete modal
+  const [fileToDelete, setFileToDelete] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+
+  const [files, setFiles] = useState([
+    {
+      id: 1,
+      fileName: "SETUP Food Processing Facility Upgrade.csv",
+      department: "MIS",
+      sectorCategory: "SETUP (MSMEs)",
+      lastAccessed: "07-07-2026",
+    },
+    {
+      id: 2,
+      fileName: "S&T_Scholarship(2025-2026).xlsx",
+      department: "SCC",
+      sectorCategory: "Scholarship",
+      lastAccessed: "07-07-2026",
+    },
+  ]);
+
+  const ITEMS_PER_PAGE = 10;
+
+  // TOAST HELPER
+  const triggerToast = (
+    message: string,
+    type: "success" | "error" | "info" = "info",
+  ) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  // 2. DERIVED DATA
+  const filteredFiles = files.filter((file) => {
+    const matchesSearch = file.fileName
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesDept =
+      selectedDepartment === "All department" ||
+      file.department === selectedDepartment;
+    return matchesSearch && matchesDept;
+  });
+
+  const totalPages = Math.ceil(filteredFiles.length / ITEMS_PER_PAGE);
+  const indexOfLastFile = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirstFile = indexOfLastFile - ITEMS_PER_PAGE;
+  const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
+
+  // 3. HANDLERS
+
+  const handleBatchUpload = (newFiles: any[]) => {
+    setFiles((prevFiles) => [...newFiles, ...prevFiles]);
+    setCurrentPage(1);
+  };
+
+  const handleFileUpload = (file: File, department: string) => {
+    const newFile = {
+      id: Date.now(),
+      fileName: file.name,
+      department: department,
+      sectorCategory: "Uploaded",
+      lastAccessed: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
+    };
+    setFiles((prevFiles) => [newFile, ...prevFiles]);
+    triggerToast(`"${file.name}" uploaded to ${department}`, "success");
+    setCurrentPage(1);
+  };
+
+  // Trigger the modal instead of deleting
+  const initiateDelete = (id: number, name: string) => {
+    setFileToDelete({ id, name });
+  };
+
+  // Actual deletion logic
+  const confirmDelete = () => {
+    if (fileToDelete) {
+      setFiles((prevFiles) =>
+        prevFiles.filter((file) => file.id !== fileToDelete.id),
+      );
+      triggerToast("File deleted successfully", "error");
+      setFileToDelete(null);
+    }
+  };
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    setCurrentPage(1);
+  };
+
+  const handleDeptChange = (val: string) => {
+    setSelectedDepartment(val);
+    setCurrentPage(1);
+  };
+
+  const handleDownload = (fileName: string) => {
+    const link = document.createElement("a");
+    link.href = `/files/${fileName}`;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 select-none antialiased">
+      <Navbar
+        pageTitle="File Repository"
+        subTitle="Files"
+        onViewChange={onViewChange}
+      />
+      <Sidebar activeView={currentView} onViewChange={onViewChange} />
+
+      <div className="sm:pl-64 transition-all duration-200">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h2 className="text-sm font-bold text-slate-700 mb-4">
+              Uploaded Files
+            </h2>
+            <FileUploadZone
+              onFileSelect={handleFileUpload}
+              onShowWarning={(msg) => triggerToast(msg, "error")}
+            />
+          </div>
+
+          <TableToolbar
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            selectedDepartment={selectedDepartment}
+            onDepartmentChange={handleDeptChange}
+          />
+
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[630px] overflow-hidden">
+            <div className="flex-1 overflow-hidden">
+              <FileTable
+                files={currentFiles}
+                onDelete={initiateDelete} // Pass initiateDelete here
+                onDownload={handleDownload}
+              />
+            </div>
+            {/* Pagination remains the same ... */}
+          </div>
+        </main>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {fileToDelete && (
+        <DeleteConfirmModal
+          isOpen={!!fileToDelete}
+          onClose={() => setFileToDelete(null)}
+          onConfirm={confirmDelete}
+          projectName={fileToDelete.name}
+        />
+      )}
+
+      {/* Toast Overlay */}
+      {notification && <Toast notification={notification} />}
+    </div>
+  );
+}
