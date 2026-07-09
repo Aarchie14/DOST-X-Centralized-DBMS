@@ -13,6 +13,7 @@ export default function FileRepository({
 }: {
   onViewChange: (view: string) => void;
   currentView: string;
+  openModalOnLoad?: boolean;
 }) {
   // 1. STATE HOOKS
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,17 +69,11 @@ export default function FileRepository({
     return matchesSearch && matchesDept;
   });
 
-  const totalPages = Math.ceil(filteredFiles.length / ITEMS_PER_PAGE);
   const indexOfLastFile = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstFile = indexOfLastFile - ITEMS_PER_PAGE;
   const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
 
   // 3. HANDLERS
-
-  const handleBatchUpload = (newFiles: any[]) => {
-    setFiles((prevFiles) => [...newFiles, ...prevFiles]);
-    setCurrentPage(1);
-  };
 
   const handleFileUpload = (file: File, department: string) => {
     const newFile = {

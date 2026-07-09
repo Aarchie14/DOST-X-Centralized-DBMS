@@ -4,7 +4,7 @@ import { Sidebar } from "../components/layout/Sidebar";
 import { DepartmentDropdown } from "../components/common/DepartmentDropdown";
 import DOSTD from "../assets/DOSTD.png";
 import herorBg from "../assets/hheror.bg.png";
-import { departmentStats } from "../data/departmentData";
+import { departmentStats } from "../Data/departmentData";
 
 export default function Dashboard({
   onViewChange,
@@ -23,11 +23,11 @@ export default function Dashboard({
   //
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleNavigate = (view: string) => {
+  const handleNavigate = (view: string, openModal: boolean = false) => {
     setIsLoading(true);
     // Add a fake delay to show off the loading UI
     setTimeout(() => {
-      onViewChange(view);
+      onViewChange(view, openModal);
       setIsLoading(false);
     }, 600);
   };

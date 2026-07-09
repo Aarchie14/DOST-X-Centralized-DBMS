@@ -47,16 +47,11 @@ export default function ProjectRecords({
 
   // Inside ProjectRecords.tsx
   useEffect(() => {
-    if (openModalOnLoad) {
-      const timer = setTimeout(() => {
-        handleOpenCreateModal();
-        console.log("Modal opened via delayed trigger");
-      }, 100);
-
-      return () => clearTimeout(timer);
+    if (openModalOnLoad && !isModalOpen) {
+      handleOpenCreateModal();
     }
-  }, [openModalOnLoad, handleOpenCreateModal]);
-
+  }, [openModalOnLoad, isModalOpen, handleOpenCreateModal]);
+  
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-PH", {
       style: "currency",
@@ -87,7 +82,6 @@ export default function ProjectRecords({
               setSelectedDepartment(val);
               setCurrentPage(1);
             }}
-            onNewRecordClick={handleOpenCreateModal}
             onNewRecordClick={handleOpenCreateModal}
             onExportCSV={handleExportCSV}
             onExportExcel={handleExportExcel}

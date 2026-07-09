@@ -1,5 +1,3 @@
-import React from "react";
-
 // Declaring the interface right here fixes the broken hook import completely!
 export interface ToastNotification {
   message: string;

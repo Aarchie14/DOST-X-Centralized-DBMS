@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface ExportDropdownProps {
-  onExportCSV: () => void;
-  onExportExcel: () => void;
+  onExportCSV?: () => void;
+  onExportExcel?: () => void;
 }
 
 export function ExportDropdown({
@@ -64,7 +64,7 @@ export function ExportDropdown({
         <div className="absolute right-0 mt-2 w-44 rounded-xl bg-white border border-slate-200/80 shadow-lg z-50 py-1.5 animate-in fade-in slide-in-from-top-1 duration-100">
           <button
             onClick={() => {
-              onExportExcel();
+              onExportExcel?.();
               setIsOpen(false);
             }}
             className="flex items-center gap-2.5 w-full px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
@@ -75,7 +75,7 @@ export function ExportDropdown({
 
           <button
             onClick={() => {
-              onExportCSV();
+              onExportCSV?.();
               setIsOpen(false);
             }}
             className="flex items-center gap-2.5 w-full px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"

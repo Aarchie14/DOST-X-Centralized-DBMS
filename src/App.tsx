@@ -15,9 +15,14 @@ export default function App() {
 
   // Centralized navigation logic
   const handleNavigate = (view: string, openModal: boolean = false) => {
-    console.log("Navigating to:", view, "with modal:", openModal); // <--- DEBUGGER
     setCurrentView(view);
     setShouldOpenModal(openModal);
+
+    // If we just navigated and opened the modal,
+    // set the flag back to false after a tiny delay so it doesn't loop
+    if (openModal) {
+      setTimeout(() => setShouldOpenModal(false), 100);
+    }
   };
 
   return (

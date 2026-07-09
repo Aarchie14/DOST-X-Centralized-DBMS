@@ -54,13 +54,6 @@ export function Navbar({
     return () => clearInterval(intervalId); // Cleanup interval on unmount
   }, []);
 
-  const mobileNavLinks = [
-    { label: "Dashboard", href: "#" },
-    { label: "Project Records", href: "#project-records" },
-    { label: "File Repository", href: "#file-repository" },
-    { label: "System Info", href: "#system-info" },
-  ];
-
   return (
     <nav className="bg-white text-black border-b border-slate-200 sticky top-0 z-50 font-sans md:pl-60">
       <div className="px-2 sm:px-6 lg:px-8">

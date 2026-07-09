@@ -1,11 +1,16 @@
-
+import type { ReactElement } from "react";
 import LogoDD from "../../assets/LogoDD.png";
 
-// 1. Update the Props interface
+interface NavItem {
+  id: string;
+  name: string;
+  icon: ReactElement;
+}
+
 interface SidebarProps {
   onViewChange: (view: string) => void;
   activeView: string;
-  icon: JSX.Element;
+  icon?: ReactElement;
 }
 
 export function Sidebar({ onViewChange, activeView }: SidebarProps) {

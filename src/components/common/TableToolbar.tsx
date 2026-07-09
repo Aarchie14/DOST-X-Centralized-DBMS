@@ -79,8 +79,8 @@ export function TableToolbar({
       {(onExportCSV || onExportExcel) && (
         <div className="h-[42px]">
           <ExportDropdown
-            onExportCSV={onExportCSV}
-            onExportExcel={onExportExcel}
+            onExportCSV={onExportCSV ?? (() => {})}
+            onExportExcel={onExportExcel ?? (() => {})}
           />
         </div>
       )}

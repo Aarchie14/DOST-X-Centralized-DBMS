@@ -1,5 +1,13 @@
 import { useState } from "react";
 
+interface FileRecord {
+  id: number;
+  fileName: string;
+  department: string;
+  sectorCategory: string;
+  lastAccessed: string;
+}
+
 export function useFileRepository() {
   const [files, setFiles] = useState<FileRecord[]>([
     { id: 1, fileName: "SETUP Food Processing.csv", department: "MIS", sectorCategory: "SETUP (MSMEs)", lastAccessed: "07-07-2026" },

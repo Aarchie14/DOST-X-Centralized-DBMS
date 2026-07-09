@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { INITIAL_RECORDS } from "../config/mockData";
-import { STATUSES } from "../config/constants";
 import type { ProjectRecord } from "../config/constants";
 
 const ITEMS_PER_PAGE = 10;

@@ -1,5 +1,3 @@
-import React from "react";
-
 // Defining it directly here bypasses the broken import completely!
 export interface ActivityLog {
   id: string;
@@ -46,13 +44,17 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
               <div className="flex items-center gap-1.5 mb-1">
                 <span
                   className={`text-[9px] font-bold px-1.5 py-0.2 rounded-sm border ${
-                    log?.type ? typeStyles[log.type] : "bg-slate-100 text-slate-600 border-slate-200"
+                    log?.type
+                      ? typeStyles[log.type]
+                      : "bg-slate-100 text-slate-600 border-slate-200"
                   }`}
                 >
                   {log?.type || "INFO"}
                 </span>
                 <span className="text-[10px] text-slate-400 font-mono ml-auto">
-                  {log?.timestamp?.includes(" | ") ? log.timestamp.split(" | ")[0] : log?.timestamp || "00:00"}
+                  {log?.timestamp?.includes(" | ")
+                    ? log.timestamp.split(" | ")[0]
+                    : log?.timestamp || "00:00"}
                 </span>
               </div>
               <p className="text-slate-600 font-medium line-clamp-2">
