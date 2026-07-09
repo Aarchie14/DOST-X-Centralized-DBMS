@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
@@ -71,3 +72,7 @@ export default defineConfig([
   },
 ])
 ```
+=======
+# DOST-X-Centralized-DBMS
+A centralized web-based database system that will enable staff to view, add, edit, search, import, and export records, with a file repository for storing Excel/CSV files.
+>>>>>>> 5cb2376dea5832440e16d6447184ce841c428d8d
