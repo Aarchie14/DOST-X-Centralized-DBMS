@@ -4,9 +4,9 @@ import { TableToolbar } from "../components/common/TableToolbar";
 import { FileUploadZone } from "../components/common/FileUploadZone";
 import { FileTable } from "../components/common/FileTable";
 import { Toast, type ToastNotification } from "../components/common/Toast";
-import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal"; 
-import { useState, useContext } from "react"; 
-import { AuthContext } from "../context/AuthContext"; 
+import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal";
+import { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export default function FileRepository({
   onViewChange,
@@ -16,11 +16,10 @@ export default function FileRepository({
   currentView: string;
   openModalOnLoad?: boolean;
 }) {
-
-// 1. AuthContext Hook to access user role and authentication functions
+  // 1. AuthContext Hook to access user role and authentication functions
   const { user } = useContext(AuthContext)!;
 
-    // STATE HOOKS
+  // STATE HOOKS
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] =
     useState("All department");
@@ -54,7 +53,8 @@ export default function FileRepository({
 
   const ITEMS_PER_PAGE = 10;
 
-  // TOAST HELPER
+  // --- TOAST UTILITIES ---
+  /** Triggers a transient notification message */
   const triggerToast = (
     message: string,
     type: "success" | "error" | "info" = "info",
@@ -78,8 +78,8 @@ export default function FileRepository({
   const indexOfFirstFile = indexOfLastFile - ITEMS_PER_PAGE;
   const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
 
-  // 3. HANDLERS
-
+  // --- HANDLERS ---
+  /** Adds a new file to the state and resets view */
   const handleFileUpload = (file: File, department: string) => {
     const newFile = {
       id: Date.now(),
@@ -119,6 +119,7 @@ export default function FileRepository({
     setCurrentPage(1);
   };
 
+  /** Programmatically triggers a browser file download */
   const handleDownload = (fileName: string) => {
     const link = document.createElement("a");
     link.href = `/files/${fileName}`;
@@ -139,6 +140,7 @@ export default function FileRepository({
 
       <div className="sm:pl-64 transition-all duration-200">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* SECTION: File Upload Interface */}
           <div className="mb-8">
             <h2 className="text-sm font-bold text-slate-700 mb-4">
               Uploaded Files
@@ -150,6 +152,7 @@ export default function FileRepository({
             />
           </div>
 
+          {/* SECTION: Filtering & Table Controls */}
           <TableToolbar
             searchQuery={searchQuery}
             onSearchChange={handleSearchChange}
@@ -157,21 +160,21 @@ export default function FileRepository({
             onDepartmentChange={handleDeptChange}
           />
 
+          {/* SECTION: File Listing Table */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[630px] overflow-hidden">
             <div className="flex-1 overflow-hidden">
               <FileTable
                 userRole={user?.role}
                 files={currentFiles}
-                onDelete={initiateDelete} // Pass initiateDelete here
+                onDelete={initiateDelete}
                 onDownload={handleDownload}
               />
             </div>
-            {/* Pagination remains the same ... */}
           </div>
         </main>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* MODALS & OVERLAYS */}
       {fileToDelete && (
         <DeleteConfirmModal
           isOpen={!!fileToDelete}

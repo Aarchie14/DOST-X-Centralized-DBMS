@@ -7,6 +7,10 @@ type User = {
   name: string 
 };
 
+/**
+ * AuthContext Interface
+ * Exposes user state, login/logout handlers, and application loading status.
+ */
 export const AuthContext = createContext<{
   user: User | null;
   login: (email: string, password: string) => boolean;
@@ -14,6 +18,11 @@ export const AuthContext = createContext<{
   loading: boolean;
 } | null>(null);
 
+/**
+ * AuthProvider Component
+ * Manages global authentication state, session persistence, 
+ * and provides mock credential validation.
+ */
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,11 +43,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
+  /**
+   * Clears user state and removes authentication data from storage.
+   */
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
   };
 
+  /**
+   * Side-effect to rehydrate the user session from localStorage 
+   * on initial application mount.
+   */
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) setUser(JSON.parse(savedUser));

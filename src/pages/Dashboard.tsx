@@ -25,12 +25,11 @@ export default function Dashboard({
   // Resolve the active data based on current state selection
   const currentStats =
     departmentStats[selectedDepartment] || departmentStats["All department"];
-  //
+  
   const [isLoading, setIsLoading] = useState(false);
 
   const handleNavigate = (view: string, openModal: boolean = false) => {
     setIsLoading(true);
-    // Add a fake delay to show off the loading UI
     setTimeout(() => {
       onViewChange(view, openModal);
       setIsLoading(false);
@@ -51,6 +50,7 @@ export default function Dashboard({
           </div>
         </div>
       )}
+
       {/* Global Navigation Interfaces */}
       <Navbar
         pageTitle="Dashboard Overview"
@@ -61,6 +61,7 @@ export default function Dashboard({
 
       {/* Main Container Wrapper */}
       <div className="w-full overflow-x-hidden sm:pl-64 transition-all duration-200">
+
         {/* TOP SECTION: Hero Banner Container */}
         <div
           className="relative bg-cover bg-no-repeat border-b border-slate-200 py-20"
@@ -69,6 +70,7 @@ export default function Dashboard({
             backgroundPosition: "center center",
           }}
         >
+
           {/* Restructured Gradient Mask */}
           <div className="absolute inset-0 via-transparent to-black/10 pointer-events-none" />
 
@@ -87,6 +89,7 @@ export default function Dashboard({
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {/* items-stretch matches left and right column heights automatically */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+
             {/* LEFT COLUMN: Premium Analytics Cards matched to right column height */}
             <div className="flex flex-col gap-4 h-full">
               <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">

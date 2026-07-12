@@ -1,3 +1,6 @@
+/**
+ * Interface for DeleteConfirmModal component props.
+ */
 interface DeleteConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -5,6 +8,11 @@ interface DeleteConfirmModalProps {
   projectName: string;
 }
 
+/**
+ * DeleteConfirmModal Component
+ * A destructive action confirmation modal used to prevent accidental deletion 
+ * of project records.
+ */
 export function DeleteConfirmModal({ isOpen, onClose, onConfirm, projectName }: DeleteConfirmModalProps) {
   if (!isOpen) return null;
 

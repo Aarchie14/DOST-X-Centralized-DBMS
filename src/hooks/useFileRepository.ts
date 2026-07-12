@@ -1,5 +1,7 @@
 import { useState } from "react";
-
+/**
+ * Interface representing a file entry within the repository.
+ */
 interface FileRecord {
   id: number;
   fileName: string;
@@ -8,19 +10,32 @@ interface FileRecord {
   lastAccessed: string;
 }
 
+/**
+ * useFileRepository Hook
+ * Manages the state and filtering logic for the departmental file repository.
+ */
 export function useFileRepository() {
+  // --- DATA STATE ---
   const [files, setFiles] = useState<FileRecord[]>([
     { id: 1, fileName: "SETUP Food Processing.csv", department: "MIS", sectorCategory: "SETUP (MSMEs)", lastAccessed: "07-07-2026" },
-    // Add your other initial records here...
   ]);
 
+  // --- UI STATE ---
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("All department");
 
+  /**
+   * Removes a file record from the repository by its unique ID.
+   * @param id - The unique identifier of the file to delete.
+   */
   const handleDeleteFile = (id: number) => {
     setFiles(files.filter(f => f.id !== id));
   };
 
+  // --- DERIVED DATA ---
+  /**
+   * Computed list of files based on active search criteria and department filters.
+   */
   const filteredFiles = files.filter(f => {
     const matchesDept = selectedDepartment === "All department" || f.department === selectedDepartment;
     const matchesSearch = f.fileName.toLowerCase().includes(searchQuery.toLowerCase());

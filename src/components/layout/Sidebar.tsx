@@ -3,20 +3,32 @@ import LogoDD from "../../assets/LogoDD.png";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
+/**
+ * Interface representing a navigation item in the sidebar.
+ */
 interface NavItem {
   id: string;
   name: string;
   icon: ReactElement;
 }
 
+/**
+ * Interface for Sidebar props.
+ */
 interface SidebarProps {
   onViewChange: (view: string) => void;
   activeView: string;
   icon?: ReactElement;
 }
 
+/**
+ * Sidebar Component
+ * Provides global navigation and session management for the application.
+ */
 export function Sidebar({ onViewChange, activeView }: SidebarProps) {
   const { logout } = useContext(AuthContext)!;
+
+  // --- NAVIGATION CONFIGURATION ---
   const navItems: NavItem[] = [
     {
       id: "dashboard",
@@ -106,7 +118,6 @@ export function Sidebar({ onViewChange, activeView }: SidebarProps) {
     <aside className="fixed inset-y-0 left-0 z-50 hidden sm:flex flex-col w-70 bg-slate-100 border-r border-slate-200 text-slate-700">
       {/* BRANDING LOGO & HEADER AREA */}
       <div className="flex items-center gap-3 px-5 py-6 border-b border-slate-200">
-        {/* 2. UPDATED LOGO CONTAINER: Replaced the database SVG icon with your image asset */}
         <div className="flex items-center justify-center shrink-0">
           <img
             src={LogoDD}
@@ -154,29 +165,28 @@ export function Sidebar({ onViewChange, activeView }: SidebarProps) {
         })}
       </nav>
 
-{/* BOTTOM FOOTER */}
+      {/* SECTION: Footer Actions (Logout) */}
       <div className="p-4 border-t border-slate-200">
         <button
           onClick={logout}
           className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
         >
-          {/* Logout Icon */}
-          <svg 
-            className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2.5} 
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
             />
           </svg>
           Logout
         </button>
       </div>
-      </aside>
+    </aside>
   );
 }

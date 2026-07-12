@@ -1,4 +1,4 @@
-import { DEPARTMENTS, SECTORS, STATUSES } from "./constants"; // They are in the same folder!
+import { DEPARTMENTS, SECTORS, STATUSES } from "./constants";
 import type { ProjectRecord } from "./constants";
 
 export const INITIAL_RECORDS: ProjectRecord[] = [

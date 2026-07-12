@@ -1,6 +1,9 @@
-import { DepartmentDropdown } from "./DepartmentDropdown"; // <--- THIS LINE IS MISSING
+import { DepartmentDropdown } from "./DepartmentDropdown";
 import { ExportDropdown } from "./ExportDropdown";
 
+/**
+ * Interface for TableToolbar component props.
+ */
 interface TableToolbarProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
@@ -13,19 +16,23 @@ interface TableToolbarProps {
   userRole?: "admin" | "user";
 }
 
+/**
+ * TableToolbar Component
+ * Provides search functionality, filtering, administrative creation actions, and data export options.
+ */
 export function TableToolbar({
   searchQuery,
   onSearchChange,
   selectedDepartment,
   onDepartmentChange,
-  onNewRecordClick, // These are now optional
+  onNewRecordClick,
   onExportCSV,
   onExportExcel,
   userRole,
 }: TableToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
-      {/* Search Input */}
+      {/* SECTION: Search Functionality */}
       <div className="flex-1 min-w-[280px] relative group">
         <svg
           className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"
@@ -49,13 +56,13 @@ export function TableToolbar({
         />
       </div>
 
+      {/* SECTION: Department Filter */}
       <DepartmentDropdown
         value={selectedDepartment}
         onChange={onDepartmentChange}
       />
-
-      {/* Conditionally render New Record Button */}
-
+      {/* SECTION: Administrative Actions */}
+      {/* Render "New Record" button only for admins when action is provided */}
       {userRole === "admin" && onNewRecordClick && (
         <button
           onClick={onNewRecordClick}
@@ -78,7 +85,8 @@ export function TableToolbar({
         </button>
       )}
 
-      {/* Conditionally render Export Dropdown */}
+      {/* SECTION: Export Options */}
+      {/* Only show export dropdown if at least one export method is defined */}
       {(onExportCSV || onExportExcel) && (
         <div className="h-[42px]">
           <ExportDropdown

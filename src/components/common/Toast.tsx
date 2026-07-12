@@ -1,14 +1,25 @@
-// Declaring the interface right here fixes the broken hook import completely!
+/**
+ * Interface defining the structure of a toast notification.
+ */
 export interface ToastNotification {
   message: string;
   type: "success" | "error" | "info";
 }
 
+/**
+ * Interface for Toast component props.
+ */
 interface ToastProps {
   notification: ToastNotification;
 }
 
+/**
+ * Toast Component
+ * Displays a non-intrusive, temporary notification message to the user.
+ */
 export function Toast({ notification }: ToastProps) {
+  // SECTION: Style Configuration
+  // Mapping notification types to their respective tailwind style sets
   const styles = {
     success:
       "bg-emerald-600 border-emerald-500 text-white shadow-emerald-600/10",
@@ -16,12 +27,15 @@ export function Toast({ notification }: ToastProps) {
     info: "bg-slate-800 border-slate-700 text-white shadow-slate-900/20",
   };
 
+  // Ensure safe access to notification properties
   const safeNotification = notification || { message: "", type: "info" };
 
   return (
     <div
       className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border text-xs font-semibold shadow-xl transition-all duration-300 ${styles[safeNotification.type]}`}
     >
+      {/* SECTION: Icon Rendering */}
+      {/* Dynamic icon based on notification type */}
       {safeNotification.type === "success" && (
         <svg
           className="w-4 h-4 text-emerald-200"
@@ -67,6 +81,7 @@ export function Toast({ notification }: ToastProps) {
           />
         </svg>
       )}
+      {/* SECTION: Content */}
       <span>{safeNotification.message}</span>
     </div>
   );

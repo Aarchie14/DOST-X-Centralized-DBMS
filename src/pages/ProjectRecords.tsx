@@ -20,7 +20,14 @@ export default function ProjectRecords({
   openModalOnLoad?: boolean; 
 }) {
 
+/**
+ * ProjectRecords Component
+ * Central hub for viewing, searching, and managing project data.
+ * Utilizes the custom useProjectRecords hook for data logic and state orchestration.
+ */
   const { user } = useContext(AuthContext)!;
+
+  // Custom hook containing business logic, filtering, and CRUD operations
   const {
     searchQuery,
     setSearchQuery,
@@ -49,13 +56,17 @@ export default function ProjectRecords({
     notification,
   } = useProjectRecords();
 
-  // Inside ProjectRecords.tsx
+  /** 
+   * Side-effect to handle triggered modal states (e.g., direct navigation 
+   * to this page with an 'open' intent from the dashboard)
+   */
   useEffect(() => {
     if (openModalOnLoad && !isModalOpen) {
       handleOpenCreateModal();
     }
   }, [openModalOnLoad, isModalOpen, handleOpenCreateModal]);
 
+  /** Formats raw numbers into Philippine Peso currency strings */
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-PH", {
       style: "currency",
@@ -75,6 +86,8 @@ export default function ProjectRecords({
 
       <div className="sm:pl-64 transition-all duration-200">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+
+          {/* SECTION: Toolbar for Search, Department Filter, and Data Exports */}
           <TableToolbar
             searchQuery={searchQuery}
             userRole={user?.role} 
@@ -92,10 +105,10 @@ export default function ProjectRecords({
             onExportExcel={handleExportExcel}
           />
 
-          {/* Table goes back to a clean full-width footprint */}
+         {/* SECTION: Main Data Table */}
           <div className="w-full">
             <ProjectTable
-              userRole={user?.role} // Pass the role to the table
+              userRole={user?.role}
               filteredRecords={paginatedRecords}
               totalCount={totalRecordsCount}
               itemsPerPage={ITEMS_PER_PAGE}
@@ -109,6 +122,7 @@ export default function ProjectRecords({
         </main>
       </div>
 
+{/* MODALS & OVERLAYS */}
       {isModalOpen && (
         <ProjectFormModal
           editingId={editingId}

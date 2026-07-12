@@ -1,6 +1,9 @@
 import type { ProjectRecord } from "../../config/constants";
 import { STATUSES } from "../../config/constants";
 
+/**
+ * Interface for ProjectTable component props.
+ */
 interface ProjectTableProps {
   userRole?: "admin" | "user";
   filteredRecords: ProjectRecord[];
@@ -13,6 +16,10 @@ interface ProjectTableProps {
   onDeleteRecord: (project: ProjectRecord) => void;
 }
 
+/**
+ * ProjectTable Component
+ * Displays a paginated list of project records with administrative action capabilities.
+ */
 export function ProjectTable({
   userRole,
   filteredRecords,
@@ -26,11 +33,13 @@ export function ProjectTable({
 }: ProjectTableProps) {
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
+  // Calculate pagination display range
   const rangeStart =
     totalCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const rangeEnd = Math.min(currentPage * itemsPerPage, totalCount);
 
-  // Easily adjust your badge design palette right here!
+  // SECTION: Badge Configuration
+  // Centralized palette for project status styling
   const statusBadgeStyles: Record<string, string> = {
     [STATUSES.ON_GOING]:
       "bg-green-500/10 text-green-700 border border-green-500/20",
@@ -41,6 +50,7 @@ export function ProjectTable({
 
   return (
     <div className="bg-white border border-slate-200/50 rounded-2xl shadow-xs overflow-hidden">
+      {/* SECTION: Table Content */}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse whitespace-nowrap">
           <thead>
@@ -69,7 +79,7 @@ export function ProjectTable({
               </tr>
             ) : (
               filteredRecords.map((project) => {
-                // Fetch the mapped status classes, fallback if not explicitly found
+                // Determine badge style based on status, apply fallback if unknown
                 const activeBadgeStyle =
                   statusBadgeStyles[project.status] ||
                   "bg-slate-100 text-slate-600 border border-slate-200";
@@ -105,6 +115,7 @@ export function ProjectTable({
                       {project.lastAccessed}
                     </td>
                     <td className="py-2.5 px-6 text-center">
+                      {/* Administrative Controls */}
                       {userRole === "admin" && (
                         <div className="inline-flex items-center gap-1.5">
                           <button
@@ -155,6 +166,7 @@ export function ProjectTable({
         </table>
       </div>
 
+      {/* SECTION: Pagination Footer */}
       <div className="px-6 py-3 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3 bg-slate-50/20">
         <span className="text-xs font-bold text-slate-400">
           Showing {rangeStart} to {rangeEnd} of {totalCount} entries
@@ -162,6 +174,7 @@ export function ProjectTable({
 
         {totalPages > 1 && (
           <div className="inline-flex items-center gap-1 bg-slate-100/60 p-1 rounded-xl border border-slate-200/30">
+            {/* Previous Page Button */}
             <button
               disabled={currentPage === 1}
               onClick={() => onPageChange(currentPage - 1)}
@@ -182,6 +195,7 @@ export function ProjectTable({
               </svg>
             </button>
 
+            {/* Page Number Buttons */}
             {Array.from({ length: totalPages }, (_, index) => {
               const pageNumber = index + 1;
               return (
@@ -199,6 +213,7 @@ export function ProjectTable({
               );
             })}
 
+            {/* Next Page Button */}
             <button
               disabled={currentPage === totalPages}
               onClick={() => onPageChange(currentPage + 1)}

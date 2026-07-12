@@ -4,15 +4,23 @@ import type { ProjectRecord } from "../config/constants";
 
 const ITEMS_PER_PAGE = 10;
 
+/**
+ * useProjectRecords Hook
+ * Manages project data state, filtering, CRUD operations, 
+ * pagination, and report export functionality.
+ */
 export function useProjectRecords() {
+
+  // --- UI STATE ---
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("All department");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+
+// --- DATA STATE ---
   const [editingId, setEditingId] = useState<number | null>(null);
   const [deletingProject, setDeletingProject] = useState<ProjectRecord | null>(null);
-
   const [newProject, setNewProject] = useState({
     name: "",
     department: "" as any,
@@ -20,24 +28,23 @@ export function useProjectRecords() {
     budget: "",
     status: "" as any,
   });
-
   const [records, setRecords] = useState<ProjectRecord[]>(INITIAL_RECORDS);
   
-const openModalImmediately = () => {
-  setIsModalOpen(true);
-};
-
-  // State for tracking a single active popup notification
+// --- NOTIFICATION STATE ---
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
-  // Helper to trigger a self-dismissing toast
+/** Triggers a self-dismissing toast notification */
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
     setNotification({ message, type });
     setTimeout(() => {
       setNotification(null);
-    }, 3000); // Automatically disappears after 3 seconds
+    }, 3000); 
   };
 
+  // --- MODAL HANDLERS ---
+const openModalImmediately = () => {
+  setIsModalOpen(true);
+};
   const handleOpenCreateModal = () => {
     setEditingId(null);
     setNewProject({ name: "", department: "" as any, sectorCategory: "" as any, budget: "", status: "" as any });
@@ -61,13 +68,12 @@ const openModalImmediately = () => {
     setIsDeleteModalOpen(true);
   };
 
+  // --- CRUD OPERATIONS ---
   const handleConfirmDelete = () => {
     if (deletingProject) {
       setRecords(records.filter((r) => r.id !== deletingProject.id));
-      
       // TRIGGER NOTIFICATION
       showToast(`Successfully deleted "${deletingProject.name}"`, "error");
-
       setIsDeleteModalOpen(false);
       setDeletingProject(null);
       setCurrentPage(1);
@@ -77,7 +83,7 @@ const openModalImmediately = () => {
   const handleSaveRecord = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProject.name.trim() || !newProject.budget) return;
-
+// Handle Edit
     if (editingId !== null) {
       setRecords(records.map((rec) => rec.id === editingId ? {
         ...rec,
@@ -91,7 +97,7 @@ const openModalImmediately = () => {
 
       // TRIGGER NOTIFICATION
       showToast(`Updated entry for "${newProject.name}"`, "info");
-
+// Handle Creation
     } else {
       const newRecordEntry: ProjectRecord = {
         id: records.length > 0 ? Math.max(...records.map((r) => r.id)) + 1 : 1,
@@ -102,13 +108,13 @@ const openModalImmediately = () => {
         status: newProject.status as any,
         lastAccessed: "07-08-2026",
       };
-
       const updatedRecords = [...records, newRecordEntry];
       setRecords(updatedRecords);
 
       // TRIGGER NOTIFICATION
       showToast(`Created new project "${newProject.name}"`, "success");
 
+      // Navigate to last page after adding
       const totalFilteredCount = updatedRecords.filter((rec) => {
         const matchesDept = selectedDepartment === "All department" || rec.department === selectedDepartment;
         const matchesSearch = rec.name.toLowerCase().includes(searchQuery.toLowerCase()) || rec.sectorCategory.toLowerCase().includes(searchQuery.toLowerCase());
@@ -120,9 +126,8 @@ const openModalImmediately = () => {
     setIsModalOpen(false);
   };
 
-  // --- NEW EXPORT LOGIC UTILITIES ---
-
-  // Helper to compile matching records matrix data cleanly into a parsed CSV string template
+// --- EXPORT LOGIC ---
+  /** Converts the full record list into a CSV-formatted string */
   const generateCSVData = () => {
     const headers = ["Project ID", "Project Name", "Department", "Sector Category", "Budget (PHP)", "Status", "Last Accessed"];
     const rows = records.map((rec) => [
@@ -137,7 +142,7 @@ const openModalImmediately = () => {
     return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
   };
 
-  // Option A: Standard Plain Text CSV Data 
+/** Exports currently stored data as a CSV file */
   const handleExportCSV = () => {
     if (records.length === 0) return showToast("No data to export", "info");
     const csvContent = generateCSVData();
@@ -145,7 +150,7 @@ const openModalImmediately = () => {
     triggerDownload(blob, "Standard_Report.csv");
   };
 
-  // Option B: Excel-Optimized parsing with Byte Order Mark configuration
+/** Exports currently stored data as an Excel-compatible XLS file */
  const handleExportExcel = () => {
     if (records.length === 0) return showToast("No data to export", "info");
 
@@ -188,7 +193,7 @@ const openModalImmediately = () => {
     triggerDownload(blob, "Report.xls");
   };
 
-  // Browser anchor DOM executor runner
+/** Browser utility to force download a blob file */
   const triggerDownload = (blob: Blob, suffix: string) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -201,6 +206,7 @@ const openModalImmediately = () => {
     showToast("Report exported successfully!", "success");
   };
 
+  // --- DERIVED DATA ---
   const sortedAndFilteredRecords = records
     .filter((rec) => {
       const matchesDept = selectedDepartment === "All department" || rec.department === selectedDepartment;
@@ -208,7 +214,6 @@ const openModalImmediately = () => {
       return matchesDept && matchesSearch;
     })
     .sort((a, b) => a.id - b.id);
-
   const paginatedRecords = sortedAndFilteredRecords.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return {
@@ -222,8 +227,8 @@ const openModalImmediately = () => {
     paginatedRecords,
     ITEMS_PER_PAGE,
     handleOpenCreateModal, handleOpenEditModal, handleOpenDeleteModal, handleConfirmDelete, handleSaveRecord,
-    handleExportCSV,   // Export handler exposed
-    handleExportExcel, // Excel handler exposed
+    handleExportCSV,   
+    handleExportExcel, 
     notification, 
     openModalImmediately,
   };

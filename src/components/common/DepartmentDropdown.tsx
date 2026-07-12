@@ -1,10 +1,19 @@
+/**
+ * Interface for DepartmentDropdown component props.
+ */
 interface Props {
   value?: string;
   onChange?: (value: string) => void;
 }
 
+// Available options for the department filter
 const departments = ["All department", "GAD", "SCC", "MIS", "Planning"];
 
+
+/**
+ * DepartmentDropdown Component
+ * A styled select input for filtering records by organizational department.
+ */
 export function DepartmentDropdown({
   value = "All department",
   onChange,

@@ -1,17 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
-// Define the shape of the component's dynamic inputs (Props)
+/**
+ * Interface representing the properties for the Navbar component.
+ */
 interface NavbarProps {
   pageTitle?: string;
   subTitle?: string;
   onViewChange: (view: string) => void;
 }
 
+/**
+ * Navbar Component
+ * Serves as the primary navigation header for the CDMS.
+ * Features a real-time system clock and a responsive mobile menu.
+ */
 export function Navbar({
   pageTitle = "Dashboard Overview",
   subTitle = "Dashboard",
   onViewChange,
 }: NavbarProps) {
+  const { logout } = useContext(AuthContext)!;
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<string>("");
 
@@ -22,14 +31,16 @@ export function Navbar({
     { label: "System Info", view: "info" },
   ];
 
-  // Smoothly toggle the mobile menu state
+/** Toggles the mobile navigation drawer visibility */
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // Update the clock in real-time
+/** 
+   * Updates the system clock every second. 
+   * Uses local time formatting for consistency.
+   */
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-
       // Format options to perfectly match: Mon, Jul 6, 2026 • 03:59:12 PM
       const dateString = now.toLocaleDateString("en-US", {
         weekday: "short",
@@ -37,20 +48,16 @@ export function Navbar({
         day: "numeric",
         year: "numeric",
       });
-
       const timeString = now.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
         hour12: true,
       });
-
       setCurrentTime(`${dateString} • ${timeString}`);
     };
-
     updateTime(); // Initial run
     const intervalId = setInterval(updateTime, 1000); // Update every second
-
     return () => clearInterval(intervalId); // Cleanup interval on unmount
   }, []);
 
@@ -122,8 +129,7 @@ export function Navbar({
           </div>
         </div>
       </div>
-      {/* MOBILE ONLY: Dropdown Panel */}
-
+      
       {/* MOBILE ONLY: Dropdown Panel */}
       {isOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 px-2 pt-2 pb-4 space-y-1 shadow-inner">
@@ -139,6 +145,16 @@ export function Navbar({
               {item.label}
             </button>
           ))}
+          {/* Logout Button */}
+          <button
+            onClick={() => {
+              logout();
+              setIsOpen(false);
+            }}
+            className="w-full text-left block px-3 py-2 mt-2 rounded-md text-base font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer border-t border-slate-100"
+          >
+            Logout
+          </button>
         </div>
       )}
     </nav>

@@ -1,10 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 
+/**
+ * Interface for ExportDropdown component props.
+ */
 interface ExportDropdownProps {
   onExportCSV?: () => void;
   onExportExcel?: () => void;
 }
 
+/**
+ * ExportDropdown Component
+ * A toggleable menu providing multiple export formats (CSV/Excel) for project data.
+ */
 export function ExportDropdown({
   onExportCSV,
   onExportExcel,
@@ -12,6 +19,9 @@ export function ExportDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Effect to handle clicking outside the component to close the menu.
+   */
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -27,6 +37,7 @@ export function ExportDropdown({
 
   return (
     <div className="relative inline-block text-left h-[42px]" ref={dropdownRef}>
+      {/* SECTION: Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="h-full flex items-center gap-2 px-5 bg-emerald-500 border hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-2xs transition-all duration-150"
@@ -60,8 +71,10 @@ export function ExportDropdown({
         </svg>
       </button>
 
+      {/* SECTION: Dropdown Menu Overlay */}
       {isOpen && (
         <div className="absolute right-0 mt-2 w-44 rounded-xl bg-white border border-slate-200/80 shadow-lg z-50 py-1.5 animate-in fade-in slide-in-from-top-1 duration-100">
+          {/* Excel Export Option */}
           <button
             onClick={() => {
               onExportExcel?.();
@@ -73,6 +86,7 @@ export function ExportDropdown({
             Microsoft Excel (.csv)
           </button>
 
+          {/* Standard CSV Export Option */}
           <button
             onClick={() => {
               onExportCSV?.();

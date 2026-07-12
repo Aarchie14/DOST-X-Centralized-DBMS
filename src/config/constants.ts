@@ -10,7 +10,7 @@ export const DEPARTMENTS = {
 
 export const SECTORS = {
   SETUP: "SETUP (MSMEs)",
-  SCHOLARSHIPS: "Scholarships", // or "Scholarship" based on your table view
+  SCHOLARSHIPS: "Scholarships", 
   SERVICES: "S&T Services",
   PROJECTS: "R&D Projects",
 } as const;
@@ -29,7 +29,7 @@ export type ProjectStatus = typeof STATUSES[keyof typeof STATUSES];
 export interface ProjectRecord {
   id: number;
   name: string;
-  department: Exclude<Department, "All department">; // The data record itself cannot be "All"
+  department: Exclude<Department, "All department">; 
   sectorCategory: Sector;
   budget: number;
   status: ProjectStatus;

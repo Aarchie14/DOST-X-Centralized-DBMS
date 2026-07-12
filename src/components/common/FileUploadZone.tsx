@@ -1,11 +1,18 @@
 import { useState } from "react";
 
+/**
+ * Interface for FileUploadZone component props.
+ */
 interface FileUploadZoneProps {
   onFileSelect: (file: File, department: string) => void;
   onShowWarning: (message: string) => void;
   userRole?: "admin" | "user";
 }
 
+/**
+ * FileUploadZone Component
+ * Provides a drag-and-drop interface for administrators to upload files to specific departments.
+ */
 export function FileUploadZone({
   onFileSelect,
   onShowWarning,
@@ -13,8 +20,12 @@ export function FileUploadZone({
 }: FileUploadZoneProps) {
   const [department, setDepartment] = useState("");
 
-if (userRole !== 'admin') return null;
+  // Restrict access: Only administrators can view/use the upload zone
+  if (userRole !== "admin") return null;
 
+  /**
+   * Validates department selection before triggering the file upload process.
+   */
   const handleUpload = (files: FileList) => {
     if (!department) {
       // Use the toast callback instead of alert()
@@ -26,11 +37,17 @@ if (userRole !== 'admin') return null;
     });
   };
 
+  /**
+   * Prevents default browser behavior to allow drop events.
+   */
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
+  /**
+   * Handles drop events and initiates upload for valid files.
+   */
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -67,6 +84,7 @@ if (userRole !== 'admin') return null;
         </select>
       </div>
 
+      {/* SECTION: File Input Field */}
       <input
         type="file"
         multiple
@@ -78,6 +96,8 @@ if (userRole !== 'admin') return null;
           }
         }}
       />
+
+      {/* SECTION: Drag and Drop Area */}
       <label htmlFor="file-upload" className="cursor-pointer block">
         <div className="w-10 h-10 mx-auto bg-slate-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-[#00aeef]/10">
           <svg

@@ -1,3 +1,6 @@
+/**
+ * Interface representing a file record in the repository.
+ */
 interface FileRecord {
   id: number;
   fileName: string;
@@ -6,6 +9,9 @@ interface FileRecord {
   userRole?: "admin" | "user";
 }
 
+/**
+ * Interface for FileTable component props.
+ */
 interface FileTableProps {
   files: FileRecord[];
   onDelete: (id: number, name: string) => void;
@@ -13,7 +19,17 @@ interface FileTableProps {
   userRole?: "admin" | "user";
 }
 
-export function FileTable({ files, onDelete, onDownload, userRole }: FileTableProps) {
+/**
+ * FileTable Component
+ * Renders a tabular list of files with support for download and administrative deletion.
+ * Includes layout stabilization for a consistent UI footprint.
+ */
+export function FileTable({
+  files,
+  onDelete,
+  onDownload,
+  userRole,
+}: FileTableProps) {
   const ITEMS_PER_PAGE = 10;
   // This ensures we always have exactly 10 rows worth of height
   const emptyRows = ITEMS_PER_PAGE - files.length;
@@ -21,6 +37,7 @@ export function FileTable({ files, onDelete, onDownload, userRole }: FileTablePr
   return (
     <div className="w-full h-full overflow-hidden">
       <table className="w-full text-left border-collapse table-fixed">
+        {/* SECTION: Table Header */}
         <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
           <tr className="text-slate-500 text-xs uppercase tracking-wider">
             <th className="px-6 py-4 font-semibold w-1/3">File Name</th>
@@ -31,6 +48,8 @@ export function FileTable({ files, onDelete, onDownload, userRole }: FileTablePr
             </th>
           </tr>
         </thead>
+
+        {/* SECTION: Table Body */}
         <tbody className="divide-y divide-slate-100">
           {files.map((file) => (
             <tr
@@ -46,6 +65,8 @@ export function FileTable({ files, onDelete, onDownload, userRole }: FileTablePr
               <td className="px-6 py-2 text-sm text-slate-600 font-mono">
                 {file.lastAccessed}
               </td>
+
+              {/* Action Buttons Column */}
               <td className="px-6 py-2 text-center">
                 <div className="flex items-center justify-center gap-3">
                   <button
@@ -66,34 +87,39 @@ export function FileTable({ files, onDelete, onDownload, userRole }: FileTablePr
                       />
                     </svg>
                   </button>
+
+                  {/* Delete Button: Rendered only for users with admin role */}
                   {userRole === "admin" && (
-                  <button
-                    onClick={() => onDelete(file.id, file.fileName)}
-                    className="text-slate-400 hover:text-red-500 transition-colors"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    <button
+                      onClick={() => onDelete(file.id, file.fileName)}
+                      className="text-slate-400 hover:text-red-500 transition-colors"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
                   )}
                 </div>
               </td>
             </tr>
           ))}
 
+          {/* SECTION: Empty Row Padding */}
+          {/* Fills remaining rows to stabilize table height and prevent layout shift */}
           {emptyRows > 0 &&
             Array.from({ length: emptyRows }).map((_, index) => (
               <tr key={`empty-${index}`} className="h-[52px]">
+                
                 {/* Remove borders from empty rows so they don't look like cut-off lines */}
                 <td colSpan={4} className="border-none">
                   &nbsp;

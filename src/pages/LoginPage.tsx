@@ -2,17 +2,29 @@ import { useState, useContext, FormEvent } from "react";
 import { AuthContext } from "../context/AuthContext";
 import LogoCW from "../assets/LogoCW.png";
 
+/**
+ * LoginPage Component
+ * Provides an authenticated gateway to the Centralized Database System.
+ * Features a glassmorphism aesthetic and loading state handling.
+ */
 export default function LoginPage() {
   const { login } = useContext(AuthContext)!;
+
+  // --- STATE HOOKS ---
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // New state
+  const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * Handles the authentication form submission.
+   * Prevents default browser refresh, triggers the auth context login,
+   * and manages UI loading states.
+   */
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulating slight delay for professional feel
+    // Attempt login and handle response
     const success = await login(email, password);
 
     if (!success) {
@@ -26,12 +38,15 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center p-2 bg-fixed bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url('/bglogin.png')" }}
     >
+      {/* Background Overlay for Glassmorphism Effect */}
       <div className="absolute inset-0 bg-sky-900/20 backdrop-blur-[2px]"></div>
 
+      {/* Login Form Container */}
       <form
-        onSubmit={handleSubmit} // Handle enter key and submission
+        onSubmit={handleSubmit}
         className="relative bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-md shadow-2xl w-full max-w-sm text-center"
       >
+        {/* Header Section */}
         <div className="flex flex-col items-center">
           <img
             src={LogoCW}
@@ -43,6 +58,7 @@ export default function LoginPage() {
           </h1>
         </div>
 
+        {/* Input Fields */}
         <div className="space-y-4">
           <div className="text-left">
             <label className="text-white text-xs font-bold ml-1 mb-1 block">
@@ -71,6 +87,7 @@ export default function LoginPage() {
             />
           </div>
 
+          {/* Submit Action */}
           <button
             type="submit"
             disabled={isLoading}
