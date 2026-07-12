@@ -4,8 +4,9 @@ import { TableToolbar } from "../components/common/TableToolbar";
 import { FileUploadZone } from "../components/common/FileUploadZone";
 import { FileTable } from "../components/common/FileTable";
 import { Toast, type ToastNotification } from "../components/common/Toast";
-import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal"; // Import your modal
-import { useState } from "react";
+import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal"; 
+import { useState, useContext } from "react"; 
+import { AuthContext } from "../context/AuthContext"; 
 
 export default function FileRepository({
   onViewChange,
@@ -15,7 +16,11 @@ export default function FileRepository({
   currentView: string;
   openModalOnLoad?: boolean;
 }) {
-  // 1. STATE HOOKS
+
+// 1. AuthContext Hook to access user role and authentication functions
+  const { user } = useContext(AuthContext)!;
+
+    // STATE HOOKS
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] =
     useState("All department");
@@ -139,6 +144,7 @@ export default function FileRepository({
               Uploaded Files
             </h2>
             <FileUploadZone
+              userRole={user?.role}
               onFileSelect={handleFileUpload}
               onShowWarning={(msg) => triggerToast(msg, "error")}
             />
@@ -154,6 +160,7 @@ export default function FileRepository({
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[630px] overflow-hidden">
             <div className="flex-1 overflow-hidden">
               <FileTable
+                userRole={user?.role}
                 files={currentFiles}
                 onDelete={initiateDelete} // Pass initiateDelete here
                 onDownload={handleDownload}

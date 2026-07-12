@@ -10,6 +10,7 @@ interface TableToolbarProps {
   onNewRecordClick?: () => void;
   onExportCSV?: () => void;
   onExportExcel?: () => void;
+  userRole?: "admin" | "user";
 }
 
 export function TableToolbar({
@@ -20,6 +21,7 @@ export function TableToolbar({
   onNewRecordClick, // These are now optional
   onExportCSV,
   onExportExcel,
+  userRole,
 }: TableToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -53,7 +55,8 @@ export function TableToolbar({
       />
 
       {/* Conditionally render New Record Button */}
-      {onNewRecordClick && (
+
+      {userRole === "admin" && onNewRecordClick && (
         <button
           onClick={onNewRecordClick}
           className="h-[42px] inline-flex items-center gap-2 bg-[#00aeef] text-white font-bold text-xs px-5 rounded-xl hover:bg-sky-600 transition-all active:scale-[0.98] cursor-pointer shadow-2xs"

@@ -2,6 +2,7 @@ import type { ProjectRecord } from "../../config/constants";
 import { STATUSES } from "../../config/constants";
 
 interface ProjectTableProps {
+  userRole?: "admin" | "user";
   filteredRecords: ProjectRecord[];
   totalCount: number;
   itemsPerPage: number;
@@ -13,6 +14,7 @@ interface ProjectTableProps {
 }
 
 export function ProjectTable({
+  userRole,
   filteredRecords,
   totalCount,
   itemsPerPage,
@@ -50,14 +52,16 @@ export function ProjectTable({
               <th className="py-3 px-6">Budget</th>
               <th className="py-3 px-6">Status</th>
               <th className="py-3 px-6">Last Accessed</th>
-              <th className="py-3 px-6 text-center w-24">Action</th>
+              {userRole === "admin" && (
+                <th className="py-3 px-6 text-center w-24">Action</th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100/70 text-xs font-medium text-slate-600">
             {filteredRecords.length === 0 ? (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={userRole === "admin" ? 8 : 7}
                   className="py-12 text-center text-xs font-bold text-slate-400 uppercase tracking-wider"
                 >
                   No matches found for your active criteria filters.
@@ -101,45 +105,47 @@ export function ProjectTable({
                       {project.lastAccessed}
                     </td>
                     <td className="py-2.5 px-6 text-center">
-                      <div className="inline-flex items-center gap-1.5">
-                        <button
-                          onClick={() => onOpenEditModal(project)}
-                          className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg hover:text-blue-500 transition-all cursor-pointer"
-                        >
-                          <svg
-                            className="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                      {userRole === "admin" && (
+                        <div className="inline-flex items-center gap-1.5">
+                          <button
+                            onClick={() => onOpenEditModal(project)}
+                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg hover:text-blue-500 transition-all cursor-pointer"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2.5}
-                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                            />
-                          </svg>
-                        </button>
+                            <svg
+                              className="w-3.5 h-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2.5}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
 
-                        <button
-                          onClick={() => onDeleteRecord(project)}
-                          className="p-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 rounded-lg transition-all cursor-pointer"
-                        >
-                          <svg
-                            className="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                          <button
+                            onClick={() => onDeleteRecord(project)}
+                            className="p-1.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 rounded-lg transition-all cursor-pointer"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2.5}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-16v4M4 7h16"
-                            />
-                          </svg>
-                        </button>
-                      </div>
+                            <svg
+                              className="w-3.5 h-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2.5}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-16v4M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );

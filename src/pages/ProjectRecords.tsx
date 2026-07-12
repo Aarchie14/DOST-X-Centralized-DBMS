@@ -7,16 +7,20 @@ import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal";
 import { useProjectRecords } from "../hooks/useProjectRecords";
 import { Toast } from "../components/common/Toast";
 import { useEffect } from "react";
+import { useContext } from "react"; 
+import { AuthContext } from "../context/AuthContext"; 
 
 export default function ProjectRecords({
   onViewChange,
   currentView,
-  openModalOnLoad, // Add this here
+  openModalOnLoad,
 }: {
   onViewChange: (view: string) => void;
   currentView: string;
-  openModalOnLoad?: boolean; // Add this definition (the '?' means it's optional)
+  openModalOnLoad?: boolean; 
 }) {
+
+  const { user } = useContext(AuthContext)!;
   const {
     searchQuery,
     setSearchQuery,
@@ -51,7 +55,7 @@ export default function ProjectRecords({
       handleOpenCreateModal();
     }
   }, [openModalOnLoad, isModalOpen, handleOpenCreateModal]);
-  
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-PH", {
       style: "currency",
@@ -73,6 +77,7 @@ export default function ProjectRecords({
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
           <TableToolbar
             searchQuery={searchQuery}
+            userRole={user?.role} 
             onSearchChange={(val) => {
               setSearchQuery(val);
               setCurrentPage(1);
@@ -90,6 +95,7 @@ export default function ProjectRecords({
           {/* Table goes back to a clean full-width footprint */}
           <div className="w-full">
             <ProjectTable
+              userRole={user?.role} // Pass the role to the table
               filteredRecords={paginatedRecords}
               totalCount={totalRecordsCount}
               itemsPerPage={ITEMS_PER_PAGE}

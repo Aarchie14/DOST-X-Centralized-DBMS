@@ -3,15 +3,17 @@ interface FileRecord {
   fileName: string;
   department: string;
   lastAccessed: string;
+  userRole?: "admin" | "user";
 }
 
 interface FileTableProps {
   files: FileRecord[];
   onDelete: (id: number, name: string) => void;
   onDownload: (fileName: string) => void;
+  userRole?: "admin" | "user";
 }
 
-export function FileTable({ files, onDelete, onDownload }: FileTableProps) {
+export function FileTable({ files, onDelete, onDownload, userRole }: FileTableProps) {
   const ITEMS_PER_PAGE = 10;
   // This ensures we always have exactly 10 rows worth of height
   const emptyRows = ITEMS_PER_PAGE - files.length;
@@ -64,6 +66,7 @@ export function FileTable({ files, onDelete, onDownload }: FileTableProps) {
                       />
                     </svg>
                   </button>
+                  {userRole === "admin" && (
                   <button
                     onClick={() => onDelete(file.id, file.fileName)}
                     className="text-slate-400 hover:text-red-500 transition-colors"
@@ -82,6 +85,7 @@ export function FileTable({ files, onDelete, onDownload }: FileTableProps) {
                       />
                     </svg>
                   </button>
+                  )}
                 </div>
               </td>
             </tr>

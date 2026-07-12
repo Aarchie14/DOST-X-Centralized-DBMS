@@ -1,10 +1,11 @@
-import { useState } from "react";
 import { Navbar } from "../components/layout/Navbar";
 import { Sidebar } from "../components/layout/Sidebar";
 import { DepartmentDropdown } from "../components/common/DepartmentDropdown";
 import DOSTD from "../assets/DOSTD.png";
 import herorBg from "../assets/hheror.bg.png";
 import { departmentStats } from "../Data/departmentData";
+import { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Dashboard({
   onViewChange,
@@ -13,6 +14,10 @@ export default function Dashboard({
   onViewChange: (view: string, open?: boolean) => void;
   currentView: string;
 }) {
+
+  // 1. AuthContext Hook to access user role and authentication functions
+  const { user } = useContext(AuthContext)!;
+
   // 2. STATE INTERFACES LOGIC HOOKS
   const [selectedDepartment, setSelectedDepartment] =
     useState<string>("All department");
@@ -209,49 +214,71 @@ export default function Dashboard({
                   </span>
                 </button>
 
-                {/* Plus Icon Button */}
-                <button
-                  type="button"
-                  onClick={() => handleNavigate("records", true)}
-                  className="inline-flex items-center gap-2 bg-[#00aeef] text-white font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-sky-600 transition-all active:scale-[0.98] shadow-2xs cursor-pointer"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  <span>New Project Entry</span>
-                </button>
+                {user.role === "admin" ? (
+                  <>
+                    {/* Admin Action: Create */}
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate("records", true)}
+                      className="inline-flex items-center gap-2 bg-[#00aeef] text-white font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-sky-600 transition-all shadow-2xs"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      <span>New Project Entry</span>
+                    </button>
 
-                {/* Upload Cloud Tray Icon Button */}
-                <button
-                  type="button"
-                  onClick={() => handleNavigate("repository")}
-                  className="inline-flex items-center gap-2 bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-emerald-600 transition-all active:scale-[0.98] shadow-2xs cursor-pointer"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                    />
-                  </svg>
-                  <span>Upload CSV/Excel</span>
-                </button>
+                    {/* Admin Action: Upload */}
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate("repository")}
+                      className="inline-flex items-center gap-2 bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-emerald-600 transition-all shadow-2xs"
+                    >
+                      <span>Upload CSV/Excel</span>
+                       <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                        />
+                      </svg>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* User Navigation: Projects */}
+                    <button
+                      onClick={() => handleNavigate("records")}
+                      className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-slate-200 transition-all"
+                    >
+                      <span>View Projects</span>
+                    </button>
+
+                    {/* User Navigation: Files */}
+                    <button
+                      onClick={() => handleNavigate("repository")}
+                      className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-slate-200 transition-all"
+                    >
+                      <span>View Files</span>
+                    </button>
+                  </>
+                )}
 
                 {/* Dropdown Component Wrapper */}
                 <DepartmentDropdown

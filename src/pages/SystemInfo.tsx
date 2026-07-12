@@ -1,5 +1,7 @@
 import { Navbar } from "../components/layout/Navbar";
 import { Sidebar } from "../components/layout/Sidebar";
+import { useContext } from "react"; 
+import { AuthContext } from "../context/AuthContext"; 
 
 export default function SystemInfo({
   onViewChange,
@@ -8,6 +10,8 @@ export default function SystemInfo({
   onViewChange: (view: string) => void;
   currentView: string;
 }) {
+
+    const { user } = useContext(AuthContext)!;
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 select-none antialiased">
       {/* Global Navigation Interfaces with custom metadata attributes mapped contextually */}

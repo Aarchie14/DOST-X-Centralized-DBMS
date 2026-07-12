@@ -2,14 +2,18 @@ import { useState } from "react";
 
 interface FileUploadZoneProps {
   onFileSelect: (file: File, department: string) => void;
-  onShowWarning: (message: string) => void; // New prop
+  onShowWarning: (message: string) => void;
+  userRole?: "admin" | "user";
 }
 
 export function FileUploadZone({
   onFileSelect,
   onShowWarning,
+  userRole,
 }: FileUploadZoneProps) {
   const [department, setDepartment] = useState("");
+
+if (userRole !== 'admin') return null;
 
   const handleUpload = (files: FileList) => {
     if (!department) {

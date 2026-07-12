@@ -1,51 +1,53 @@
-// src/App.tsx
-import { useState } from "react";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import ProjectRecords from "./pages/ProjectRecords";
 import FileRepository from "./pages/FileRepository";
 import SystemInfo from "./pages/SystemInfo";
+import { useContext, useState } from "react";
+import { AuthContext } from "./context/AuthContext";
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // 1. Unified Auth State
+  const { user } = useContext(AuthContext)!; // Access user from context
   const [currentView, setCurrentView] = useState("dashboard");
   const [shouldOpenModal, setShouldOpenModal] = useState(false);
 
-  if (!isLoggedIn) return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
-
-  // Centralized navigation logic
+  // 2. Navigation Handler
   const handleNavigate = (view: string, openModal: boolean = false) => {
     setCurrentView(view);
     setShouldOpenModal(openModal);
-
-    // If we just navigated and opened the modal,
-    // set the flag back to false after a tiny delay so it doesn't loop
     if (openModal) {
-      setTimeout(() => setShouldOpenModal(false), 100);
+      setTimeout(() => setShouldOpenModal(false), 500);
     }
   };
+
+  // 3. View Logic
+  if (!user) return <LoginPage />; 
 
   return (
     <>
       {currentView === "dashboard" && (
-        <Dashboard onViewChange={handleNavigate} currentView={currentView} />
+        <Dashboard
+          onViewChange={handleNavigate}
+          currentView={currentView}
+        />
       )}
       {currentView === "records" && (
         <ProjectRecords
-          onViewChange={setCurrentView}
+          onViewChange={handleNavigate} // Use handleNavigate here
           currentView={currentView}
           openModalOnLoad={shouldOpenModal}
         />
       )}
       {currentView === "repository" && (
         <FileRepository
-          onViewChange={setCurrentView}
+          onViewChange={handleNavigate}
           currentView={currentView}
           openModalOnLoad={shouldOpenModal}
         />
       )}
       {currentView === "info" && (
-        <SystemInfo onViewChange={setCurrentView} currentView={currentView} />
+        <SystemInfo onViewChange={handleNavigate} currentView={currentView} />
       )}
     </>
   );
