@@ -16,8 +16,8 @@ export default function FileRepository({
   currentView: string;
   openModalOnLoad?: boolean;
 }) {
-  // 1. AuthContext Hook to access user role and authentication functions
-  const { user } = useContext(AuthContext)!;
+  // 1. AuthContext Hook to access user role, logging, and authentication functions
+  const { user, addLog } = useContext(AuthContext)!;
 
   // STATE HOOKS
   const [searchQuery, setSearchQuery] = useState("");
@@ -90,6 +90,7 @@ export default function FileRepository({
     };
     setFiles((prevFiles) => [newFile, ...prevFiles]);
     triggerToast(`"${file.name}" uploaded to ${department}`, "success");
+    addLog("File Uploaded", `Uploaded file: "${file.name}" to ${department} department`);
     setCurrentPage(1);
   };
 
@@ -105,6 +106,7 @@ export default function FileRepository({
         prevFiles.filter((file) => file.id !== fileToDelete.id),
       );
       triggerToast("File deleted successfully", "error");
+      addLog("File Deleted", `Deleted file: "${fileToDelete.name}"`);
       setFileToDelete(null);
     }
   };

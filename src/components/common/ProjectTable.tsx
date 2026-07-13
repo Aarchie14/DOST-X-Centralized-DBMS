@@ -14,6 +14,10 @@ interface ProjectTableProps {
   formatCurrency: (amount: number) => string;
   onOpenEditModal: (project: ProjectRecord) => void;
   onDeleteRecord: (project: ProjectRecord) => void;
+  onProjectClick?: (project: ProjectRecord) => void;
+  selectedIds?: Set<number>;
+  onToggleSelection?: (id: number) => void;
+  onToggleSelectAll?: (ids: number[]) => void;
 }
 
 /**
@@ -30,6 +34,10 @@ export function ProjectTable({
   formatCurrency,
   onOpenEditModal,
   onDeleteRecord,
+  onProjectClick,
+  selectedIds = new Set(),
+  onToggleSelection,
+  onToggleSelectAll,
 }: ProjectTableProps) {
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
@@ -48,6 +56,11 @@ export function ProjectTable({
     [STATUSES.COMPLETED]: "bg-sky-500/10 text-sky-700 border border-sky-500/20",
   };
 
+  // Determine select-all checkbox state for current page
+  const pageIds = filteredRecords.map((p) => p.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id)) && !allPageSelected;
+
   return (
     <div className="bg-white border border-slate-200/50 rounded-2xl shadow-xs overflow-hidden">
       {/* SECTION: Table Content */}
@@ -55,7 +68,16 @@ export function ProjectTable({
         <table className="w-full text-left border-collapse whitespace-nowrap">
           <thead>
             <tr className="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider bg-slate-50/40">
-              <th className="py-3 px-6 w-16">ID</th>
+              <th className="py-3 px-4 w-12">
+                <input
+                  type="checkbox"
+                  checked={allPageSelected}
+                  ref={(el) => { if (el) el.indeterminate = somePageSelected; }}
+                  onChange={() => onToggleSelectAll?.(pageIds)}
+                  className="w-4 h-4 accent-[#00aeef] cursor-pointer rounded"
+                  title="Select all on this page"
+                />
+              </th>
               <th className="py-3 px-6">Project Name</th>
               <th className="py-3 px-6">Department</th>
               <th className="py-3 px-6">Sector / Category</th>
@@ -89,11 +111,22 @@ export function ProjectTable({
                     key={project.id}
                     className="hover:bg-sky-50/20 transition-colors"
                   >
-                    <td className="py-2.5 px-6 text-slate-500 font-mono">
-                      #{project.id}
+                    <td className="py-2.5 px-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(project.id)}
+                        onChange={() => onToggleSelection?.(project.id)}
+                        className="w-4 h-4 accent-[#00aeef] cursor-pointer rounded"
+                      />
                     </td>
-                    <td className="py-2.5 px-6 font-semibold text-slate-700 break-words whitespace-normal max-w-xs">
-                      {project.name}
+                    <td className="py-2.5 px-6 font-semibold break-words whitespace-normal max-w-xs">
+                      <button
+                        onClick={() => onProjectClick?.(project)}
+                        className="text-left text-cyan-600 hover:text-cyan-800 hover:underline underline-offset-2 transition-colors cursor-pointer font-semibold"
+                        title="View database entries"
+                      >
+                        {project.name}
+                      </button>
                     </td>
                     <td className="py-2.5 px-6 text-slate-500">
                       {project.department}

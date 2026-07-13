@@ -3,6 +3,9 @@ import Dashboard from "./pages/Dashboard";
 import ProjectRecords from "./pages/ProjectRecords";
 import FileRepository from "./pages/FileRepository";
 import SystemInfo from "./pages/SystemInfo";
+import UserProfile from "./pages/UserProfile";
+import UserManagement from "./pages/UserManagement";
+import ActivityLogs from "./pages/ActivityLogs";
 import { useContext, useState } from "react";
 import { AuthContext } from "./context/AuthContext";
 
@@ -46,7 +49,16 @@ export default function App() {
           openModalOnLoad={shouldOpenModal}
         />
       )}
-      {currentView === "info" && (
+      {currentView === "profile" && (
+        <UserProfile onViewChange={handleNavigate} currentView={currentView} />
+      )}
+      {currentView === "users" && (
+        <UserManagement onViewChange={handleNavigate} currentView={currentView} />
+      )}
+      {currentView === "logs" && (
+        <ActivityLogs onViewChange={handleNavigate} currentView={currentView} />
+      )}
+      {currentView === "info" && user?.role === "admin" && (
         <SystemInfo onViewChange={handleNavigate} currentView={currentView} />
       )}
     </>

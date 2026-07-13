@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { INITIAL_RECORDS } from "../config/mockData";
 import type { ProjectRecord } from "../config/constants";
+import { AuthContext } from "../context/AuthContext";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -29,9 +30,43 @@ export function useProjectRecords() {
     status: "" as any,
   });
   const [records, setRecords] = useState<ProjectRecord[]>(INITIAL_RECORDS);
+  const { addLog } = useContext(AuthContext)!;
   
 // --- NOTIFICATION STATE ---
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+// --- SELECTION STATE ---
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  /** Toggles selection for a single record ID */
+  const toggleSelection = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  /** Selects or deselects all currently visible (paginated) record IDs */
+  const toggleSelectAll = (pageRecordIds: number[]) => {
+    setSelectedIds((prev) => {
+      const allSelected = pageRecordIds.every((id) => prev.has(id));
+      const next = new Set(prev);
+      if (allSelected) {
+        pageRecordIds.forEach((id) => next.delete(id));
+      } else {
+        pageRecordIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  /** Clears the entire selection */
+  const clearSelection = () => setSelectedIds(new Set());
 
 /** Triggers a self-dismissing toast notification */
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
@@ -74,6 +109,7 @@ const openModalImmediately = () => {
       setRecords(records.filter((r) => r.id !== deletingProject.id));
       // TRIGGER NOTIFICATION
       showToast(`Successfully deleted "${deletingProject.name}"`, "error");
+      addLog("Project Record Deleted", `Deleted project: "${deletingProject.name}" (ID #${deletingProject.id})`);
       setIsDeleteModalOpen(false);
       setDeletingProject(null);
       setCurrentPage(1);
@@ -97,6 +133,7 @@ const openModalImmediately = () => {
 
       // TRIGGER NOTIFICATION
       showToast(`Updated entry for "${newProject.name}"`, "info");
+      addLog("Project Record Updated", `Updated details for project: "${newProject.name}" (ID #${editingId})`);
 // Handle Creation
     } else {
       const newRecordEntry: ProjectRecord = {
@@ -113,6 +150,7 @@ const openModalImmediately = () => {
 
       // TRIGGER NOTIFICATION
       showToast(`Created new project "${newProject.name}"`, "success");
+      addLog("Project Record Created", `Created new project: "${newProject.name}" (ID #${newRecordEntry.id})`);
 
       // Navigate to last page after adding
       const totalFilteredCount = updatedRecords.filter((rec) => {
@@ -127,12 +165,21 @@ const openModalImmediately = () => {
   };
 
 // --- EXPORT LOGIC ---
-  /** Converts the full record list into a CSV-formatted string */
+  /** Resolves which records to export: selected subset or all records */
+  const getExportRecords = () => {
+    if (selectedIds.size > 0) {
+      return records.filter((rec) => selectedIds.has(rec.id));
+    }
+    return records;
+  };
+
+  /** Converts the export record list into a CSV-formatted string */
   const generateCSVData = () => {
+    const exportRecords = getExportRecords();
     const headers = ["Project ID", "Project Name", "Department", "Sector Category", "Budget (PHP)", "Status", "Last Accessed"];
-    const rows = records.map((rec) => [
+    const rows = exportRecords.map((rec) => [
       rec.id,
-      `"${rec.name.replace(/"/g, '""')}"`, // Clean outer quotes for spacing safety
+      `"${rec.name.replace(/"/g, '""')}"`,
       `"${rec.department}"`,
       `"${rec.sectorCategory}"`,
       rec.budget,
@@ -142,19 +189,21 @@ const openModalImmediately = () => {
     return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
   };
 
-/** Exports currently stored data as a CSV file */
+/** Exports data as a CSV file */
   const handleExportCSV = () => {
-    if (records.length === 0) return showToast("No data to export", "info");
+    const exportRecords = getExportRecords();
+    if (exportRecords.length === 0) return showToast("No data to export", "info");
     const csvContent = generateCSVData();
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    triggerDownload(blob, "Standard_Report.csv");
+    const label = selectedIds.size > 0 ? `Selected_${selectedIds.size}` : "Standard";
+    triggerDownload(blob, `${label}_Report.csv`);
   };
 
-/** Exports currently stored data as an Excel-compatible XLS file */
+/** Exports data as an Excel-compatible XLS file */
  const handleExportExcel = () => {
-    if (records.length === 0) return showToast("No data to export", "info");
+    const exportRecords = getExportRecords();
+    if (exportRecords.length === 0) return showToast("No data to export", "info");
 
-    // 1. Build a clean HTML Table structure as a string
     let tableHtml = `
       <meta charset="utf-8">
       <table border="1">
@@ -169,8 +218,7 @@ const openModalImmediately = () => {
         </tr>
     `;
 
-    // 2. Append rows dynamically
-    records.forEach((rec) => {
+    exportRecords.forEach((rec) => {
       tableHtml += `
         <tr>
           <td>${rec.id}</td>
@@ -186,11 +234,9 @@ const openModalImmediately = () => {
 
     tableHtml += `</table>`;
 
-    // 3. Create a template blob that forces Excel application parsing
     const blob = new Blob([tableHtml], { type: "application/vnd.ms-excel;charset=utf-8;" });
-    
-    // 4. Trigger download with a clean .xls extension!
-    triggerDownload(blob, "Report.xls");
+    const label = selectedIds.size > 0 ? `Selected_${selectedIds.size}` : "Full";
+    triggerDownload(blob, `${label}_Report.xls`);
   };
 
 /** Browser utility to force download a blob file */
@@ -231,5 +277,9 @@ const openModalImmediately = () => {
     handleExportExcel, 
     notification, 
     openModalImmediately,
+    selectedIds,
+    toggleSelection,
+    toggleSelectAll,
+    clearSelection,
   };
 }
