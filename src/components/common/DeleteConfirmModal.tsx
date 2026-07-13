@@ -11,7 +11,7 @@ interface DeleteConfirmModalProps {
 /**
  * DeleteConfirmModal Component
  * A destructive action confirmation modal used to prevent accidental deletion 
- * of project records.
+ * of project databases.
  */
 export function DeleteConfirmModal({ isOpen, onClose, onConfirm, projectName }: DeleteConfirmModalProps) {
   if (!isOpen) return null;

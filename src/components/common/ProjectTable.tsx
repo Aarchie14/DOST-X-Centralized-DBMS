@@ -22,7 +22,7 @@ interface ProjectTableProps {
 
 /**
  * ProjectTable Component
- * Displays a paginated list of project records with administrative action capabilities.
+ * Displays a paginated list of project database with administrative action capabilities.
  */
 export function ProjectTable({
   userRole,

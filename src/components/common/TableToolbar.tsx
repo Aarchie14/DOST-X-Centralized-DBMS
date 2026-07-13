@@ -52,7 +52,7 @@ export function TableToolbar({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search..."
-          className="w-full bg-slate-100/80 border border-slate-200/60 text-sm text-slate-700 placeholder-slate-400 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:bg-white focus:border-[#00aeef] transition-all"
+          className="w-full bg-white border border-slate-200 text-sm text-slate-700 placeholder-slate-400 pl-11 pr-4 py-2.5 rounded-xl outline-none focus:border-[#00aeef] transition-all shadow-xs"
         />
       </div>
 

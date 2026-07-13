@@ -5,28 +5,17 @@ import { ProjectTable } from "../components/common/ProjectTable";
 import { ProjectFormModal } from "../components/common/ProjectFormModal";
 import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal";
 import { DatabaseView } from "../components/common/DatabaseView";
-import { useProjectRecords } from "../hooks/useProjectRecords";
+import { useProjectDatabase } from "../hooks/useProjectDatabase";
 import { Toast } from "../components/common/Toast";
 import { useEffect, useState } from "react";
 import { useContext } from "react"; 
 import { AuthContext } from "../context/AuthContext";
 import type { ProjectRecord } from "../config/constants";
+import { useLocation, useNavigate } from "react-router-dom"; // Added useLocation and kept useNavigate
 
-export default function ProjectRecords({
-  onViewChange,
-  currentView,
-  openModalOnLoad,
-}: {
-  onViewChange: (view: string) => void;
-  currentView: string;
-  openModalOnLoad?: boolean; 
-}) {
-
-/**
- * ProjectRecords Component
- * Central hub for viewing, searching, and managing project data.
- * Utilizes the custom useProjectRecords hook for data logic and state orchestration.
- */
+export default function ProjectDatabase() {
+  const location = useLocation(); // Hook to intercept the router state
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext)!;
 
   // State to track the currently opened project database
@@ -63,17 +52,21 @@ export default function ProjectRecords({
     toggleSelection,
     toggleSelectAll,
     clearSelection,
-  } = useProjectRecords();
+  } = useProjectDatabase();
 
   /** 
-   * Side-effect to handle triggered modal states (e.g., direct navigation 
-   * to this page with an 'open' intent from the dashboard)
+   * Side-effect to handle triggered modal states from route history
+   * (e.g., when the Admin clicks "New Database Entry" from the main dashboard)
    */
   useEffect(() => {
-    if (openModalOnLoad && !isModalOpen) {
+    if (location.state?.openModal && !isModalOpen) {
       handleOpenCreateModal();
+
+      // CLEANUP: Immediately clear router state history.
+      // This ensures that page refreshes or clicking 'back' later won't trigger the modal again.
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [openModalOnLoad, isModalOpen, handleOpenCreateModal]);
+  }, [location.state, isModalOpen, handleOpenCreateModal, navigate, location.pathname]);
 
   /** Formats raw numbers into Philippine Peso currency strings */
   const formatCurrency = (amount: number) => {
@@ -86,12 +79,8 @@ export default function ProjectRecords({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 select-none antialiased">
-      <Navbar
-        pageTitle="Project Records"
-        subTitle="Records"
-        onViewChange={onViewChange}
-      />
-      <Sidebar activeView={currentView} onViewChange={onViewChange} />
+      <Navbar/>
+      <Sidebar/>
 
       <div className="sm:pl-64 transition-all duration-200">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
@@ -161,7 +150,7 @@ export default function ProjectRecords({
         </main>
       </div>
 
-{/* MODALS & OVERLAYS */}
+      {/* MODALS & OVERLAYS */}
       {isModalOpen && (
         <ProjectFormModal
           editingId={editingId}

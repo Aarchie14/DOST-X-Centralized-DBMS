@@ -9,12 +9,6 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 export default function FileRepository({
-  onViewChange,
-  currentView,
-}: {
-  onViewChange: (view: string) => void;
-  currentView: string;
-  openModalOnLoad?: boolean;
 }) {
   // 1. AuthContext Hook to access user role, logging, and authentication functions
   const { user, addLog } = useContext(AuthContext)!;
@@ -133,12 +127,8 @@ export default function FileRepository({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 select-none antialiased">
-      <Navbar
-        pageTitle="File Repository"
-        subTitle="Files"
-        onViewChange={onViewChange}
-      />
-      <Sidebar activeView={currentView} onViewChange={onViewChange} />
+      <Navbar/>
+      <Sidebar/>
 
       <div className="sm:pl-64 transition-all duration-200">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

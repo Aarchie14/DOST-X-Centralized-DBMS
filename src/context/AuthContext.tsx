@@ -1,86 +1,18 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useState, useEffect, type ReactNode } from "react";
+import {
+  type User,
+  type ActivityLog,
+  STORAGE_KEYS,
+  EMAIL_PATTERN,
+  MIN_PASSWORD_LENGTH,
+  FAILURE_LIMIT,
+  LOCKOUT_MS,
+  INITIAL_USERS,
+  INITIAL_LOGS,
+} from "../types/auth";
+import { readStorageJson, writeStorageJson } from "../utils/storage";
+import { sanitizeUserRecord } from "../utils/userSanitizer";
 
-// 1. Define a complete User type
-export type User = { 
-  email: string; 
-  role: "admin" | "user"; 
-  name: string;
-  department: string;
-  systemAccess: string;
-};
-
-// Define activity log interface
-export interface ActivityLog {
-  id: string;
-  userName: string;
-  userEmail: string;
-  action: string;
-  details: string;
-  timestamp: string; // ISO string
-}
-
-const INITIAL_USERS: User[] = [
-  {
-    email: "admin@dost.gov.ph",
-    role: "admin",
-    name: "Administrator",
-    department: "MIS",
-    systemAccess: "Full Access (Read, Write, Delete, User Management)",
-  },
-  {
-    email: "user@dost.gov.ph",
-    role: "user",
-    name: "Staff Member",
-    department: "SCC",
-    systemAccess: "Standard Access (Read, Write, Edit Records)",
-  },
-  {
-    email: "planning_officer@dost.gov.ph",
-    role: "user",
-    name: "Planning Specialist",
-    department: "Planning",
-    systemAccess: "Standard Access (Read, Write, Edit Records)",
-  },
-  {
-    email: "gad_officer@dost.gov.ph",
-    role: "user",
-    name: "Gender Analyst",
-    department: "GAD",
-    systemAccess: "Standard Access (Read, Write, Edit Records)",
-  },
-];
-
-const INITIAL_LOGS: ActivityLog[] = [
-  {
-    id: "log-1",
-    userName: "Administrator",
-    userEmail: "admin@dost.gov.ph",
-    action: "System Initialization",
-    details: "System successfully initialized with 5 core projects.",
-    timestamp: "2026-07-13T00:30:00Z",
-  },
-  {
-    id: "log-2",
-    userName: "Staff Member",
-    userEmail: "user@dost.gov.ph",
-    action: "File Uploaded",
-    details: "Uploaded 'SETUP Food Processing Facility Upgrade.csv' to MIS department",
-    timestamp: "2026-07-13T00:45:24Z",
-  },
-  {
-    id: "log-3",
-    userName: "Administrator",
-    userEmail: "admin@dost.gov.ph",
-    action: "User Registered",
-    details: "Registered new system user: Planning Specialist (planning_officer@dost.gov.ph)",
-    timestamp: "2026-07-13T01:05:00Z",
-  },
-];
-
-/**
- * AuthContext Interface
- * Exposes user state, login/logout handlers, and application loading status.
- */
 export const AuthContext = createContext<{
   user: User | null;
   login: (email: string, password: string) => boolean;
@@ -94,38 +26,52 @@ export const AuthContext = createContext<{
   addLog: (action: string, details: string) => void;
 } | null>(null);
 
-/**
- * AuthProvider Component
- * Manages global authentication state, session persistence, 
- * and provides mock credential validation.
- */
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() =>
+    readStorageJson(sessionStorage, STORAGE_KEYS.sessionUser, null),
+  );
   const [loading, setLoading] = useState(true);
 
-  // Stateful list of users initialized from storage or defaults
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem("users_list");
-    return saved ? JSON.parse(saved) : INITIAL_USERS;
-  });
+  const [users, setUsers] = useState<User[]>(() =>
+    readStorageJson(localStorage, STORAGE_KEYS.usersList, INITIAL_USERS).map(
+      sanitizeUserRecord,
+    ),
+  );
 
-  // Stateful list of activity logs
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => {
-    const saved = localStorage.getItem("activity_logs");
-    return saved ? JSON.parse(saved) : INITIAL_LOGS;
-  });
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() =>
+    readStorageJson(localStorage, STORAGE_KEYS.activityLogs, INITIAL_LOGS),
+  );
 
-  // Keep localStorage synced with the users state
+  // --- PERSISTENCE SYNCS ---
   useEffect(() => {
-    localStorage.setItem("users_list", JSON.stringify(users));
+    writeStorageJson(localStorage, STORAGE_KEYS.usersList, users);
   }, [users]);
 
-  // Keep localStorage synced with activity logs state
   useEffect(() => {
-    localStorage.setItem("activity_logs", JSON.stringify(activityLogs));
+    writeStorageJson(localStorage, STORAGE_KEYS.activityLogs, activityLogs);
   }, [activityLogs]);
 
-  // Utility helper to append to activity logs list
+  useEffect(() => {
+    if (user) {
+      writeStorageJson(sessionStorage, STORAGE_KEYS.sessionUser, user);
+    } else {
+      sessionStorage.removeItem(STORAGE_KEYS.sessionUser);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const savedUser = readStorageJson<User | null>(
+      sessionStorage,
+      STORAGE_KEYS.sessionUser,
+      null,
+    );
+    if (savedUser) {
+      setUser(sanitizeUserRecord(savedUser));
+    }
+    setLoading(false);
+  }, []);
+
+  // --- ACTIONS ---
   const addLog = (action: string, details: string) => {
     const newLog: ActivityLog = {
       id: `log-${Date.now()}`,
@@ -138,93 +84,99 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setActivityLogs((prev) => [newLog, ...prev]);
   };
 
-  // Mock Logic with credentials resolved from the users list
   const login = (email: string, password: string) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
+    if (
+      !EMAIL_PATTERN.test(normalizedEmail) ||
+      trimmedPassword.length < MIN_PASSWORD_LENGTH
+    ) {
+      return false;
+    }
+
+    const lockoutUntil = Number(
+      sessionStorage.getItem(STORAGE_KEYS.loginLockoutUntil) || "0",
+    );
+    if (Date.now() < lockoutUntil) return false;
+
     const foundUser = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase()
+      (u) => u.email.toLowerCase() === normalizedEmail,
     );
 
-    if (foundUser) {
-      // Allow role-based default passwords or 'password123'
-      const expectedPassword = foundUser.role === "admin" ? "admin123" : "user123";
-      if (password === expectedPassword || password === "password123") {
-        setUser(foundUser);
-        localStorage.setItem("user", JSON.stringify(foundUser));
-
-        // Create log event
-        const newLog: ActivityLog = {
-          id: `log-${Date.now()}`,
-          userName: foundUser.name,
-          userEmail: foundUser.email,
-          action: "User Login",
-          details: `User logged in to the system.`,
-          timestamp: new Date().toISOString(),
-        };
-        setActivityLogs((prev) => [newLog, ...prev]);
-
-        return true;
-      }
+    if (!foundUser) {
+      handleFailure();
+      return false;
     }
-    return false;
+
+    const expectedPassword =
+      foundUser.password ||
+      (foundUser.role === "admin" ? "admin123" : "user123");
+    if (trimmedPassword !== expectedPassword) {
+      handleFailure();
+      return false;
+    }
+
+    sessionStorage.removeItem(STORAGE_KEYS.loginAttempts);
+    sessionStorage.removeItem(STORAGE_KEYS.loginLockoutUntil);
+
+    const { password: _, ...sessionUser } = foundUser;
+    setUser(sessionUser);
+    addLog("User Login", "User logged in to the system.");
+    return true;
   };
 
-  /**
-   * Clears user state and removes authentication data from storage.
-   */
-  const logout = () => {
-    if (user) {
-      const newLog: ActivityLog = {
-        id: `log-${Date.now()}`,
-        userName: user.name,
-        userEmail: user.email,
-        action: "User Logout",
-        details: `User logged out of the system.`,
-        timestamp: new Date().toISOString(),
-      };
-      setActivityLogs((prev) => [newLog, ...prev]);
+  const handleFailure = () => {
+    const attempts =
+      Number(sessionStorage.getItem(STORAGE_KEYS.loginAttempts) || "0") + 1;
+    sessionStorage.setItem(STORAGE_KEYS.loginAttempts, String(attempts));
+    if (attempts >= FAILURE_LIMIT) {
+      sessionStorage.setItem(
+        STORAGE_KEYS.loginLockoutUntil,
+        String(Date.now() + LOCKOUT_MS),
+      );
     }
+  };
+
+  const logout = () => {
+    if (user) addLog("User Logout", "User logged out of the system.");
     setUser(null);
-    localStorage.removeItem("user");
+    sessionStorage.removeItem(STORAGE_KEYS.sessionUser);
   };
 
   const addUser = (newUser: User) => {
-    setUsers((prev) => [...prev, newUser]);
+    const normalizedUser = sanitizeUserRecord(newUser);
+
+    setUsers((prev) => {
+      const alreadyExists = prev.some(
+        (u) => u.email.toLowerCase() === normalizedUser.email.toLowerCase(),
+      );
+      return alreadyExists ? prev : [...prev, normalizedUser];
+    });
   };
 
   const updateUser = (email: string, updatedFields: Partial<User>) => {
     setUsers((prev) =>
       prev.map((u) => {
         if (u.email.toLowerCase() === email.toLowerCase()) {
-          const updatedU = { ...u, ...updatedFields };
-          // If the edited user is the current active session, sync it
+          const updatedU = sanitizeUserRecord({ ...u, ...updatedFields });
           if (user && user.email.toLowerCase() === email.toLowerCase()) {
-            setUser(updatedU);
-            localStorage.setItem("user", JSON.stringify(updatedU));
+            const { password: _, ...sessionUser } = updatedU;
+            setUser(sessionUser);
           }
           return updatedU;
         }
         return u;
-      })
+      }),
     );
   };
 
   const deleteUser = (email: string) => {
-    setUsers((prev) => prev.filter((u) => u.email.toLowerCase() !== email.toLowerCase()));
-    // If the active user got deleted, log them out immediately
-    if (user && user.email.toLowerCase() === email.toLowerCase()) {
-      logout();
-    }
+    setUsers((prev) =>
+      prev.filter((u) => u.email.toLowerCase() !== email.toLowerCase()),
+    );
+    if (user && user.email.toLowerCase() === email.toLowerCase()) logout();
   };
-
-  /**
-   * Side-effect to rehydrate the user session from localStorage 
-   * on initial application mount.
-   */
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) setUser(JSON.parse(savedUser));
-    setLoading(false);
-  }, []);
 
   return (
     <AuthContext.Provider
@@ -244,4 +196,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+};

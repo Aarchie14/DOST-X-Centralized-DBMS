@@ -1,66 +1,71 @@
+import { useContext } from "react";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
+import { useInactivityLogout } from "./hooks/useInactivityLogout";
+
+// Pages
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
-import ProjectRecords from "./pages/ProjectRecords";
+import ProjectDatabase from "./pages/ProjectDatabase";
 import FileRepository from "./pages/FileRepository";
 import SystemInfo from "./pages/SystemInfo";
 import UserProfile from "./pages/UserProfile";
 import UserManagement from "./pages/UserManagement";
 import ActivityLogs from "./pages/ActivityLogs";
-import { useContext, useState } from "react";
-import { AuthContext } from "./context/AuthContext";
+
+// 1. Create a Protected Layout wrapper to guard routes and host shared components
+function ProtectedLayout() {
+  const { user } = useContext(AuthContext)!;
+
+  // If not logged in, boot back to login screen
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Outlet acts as a placeholder where child components render dynamically
+  return <Outlet />;
+}
+
+// 2. Admin Guard component to lock down specific paths
+function AdminRoute() {
+  const { user } = useContext(AuthContext)!;
+  return user?.role === "admin" ? <Outlet /> : <Navigate to="/dashboard" replace />;
+}
 
 export default function App() {
-  // 1. Unified Auth State
-  const { user } = useContext(AuthContext)!; // Access user from context
-  const [currentView, setCurrentView] = useState("dashboard");
-  const [shouldOpenModal, setShouldOpenModal] = useState(false);
+  const { user, logout } = useContext(AuthContext)!;
 
-  // 2. Navigation Handler
-  const handleNavigate = (view: string, openModal: boolean = false) => {
-    setCurrentView(view);
-    setShouldOpenModal(openModal);
-    if (openModal) {
-      setTimeout(() => setShouldOpenModal(false), 500);
-    }
+  const handleLogout = () => {
+    logout();
+    // Router takes care of redirects now, window.location.replace is no longer needed
   };
 
-  // 3. View Logic
-  if (!user) return <LoginPage />; 
+  useInactivityLogout(handleLogout, 900000);
 
   return (
-    <>
-      {currentView === "dashboard" && (
-        <Dashboard
-          onViewChange={handleNavigate}
-          currentView={currentView}
-        />
-      )}
-      {currentView === "records" && (
-        <ProjectRecords
-          onViewChange={handleNavigate} // Use handleNavigate here
-          currentView={currentView}
-          openModalOnLoad={shouldOpenModal}
-        />
-      )}
-      {currentView === "repository" && (
-        <FileRepository
-          onViewChange={handleNavigate}
-          currentView={currentView}
-          openModalOnLoad={shouldOpenModal}
-        />
-      )}
-      {currentView === "profile" && (
-        <UserProfile onViewChange={handleNavigate} currentView={currentView} />
-      )}
-      {currentView === "users" && (
-        <UserManagement onViewChange={handleNavigate} currentView={currentView} />
-      )}
-      {currentView === "logs" && (
-        <ActivityLogs onViewChange={handleNavigate} currentView={currentView} />
-      )}
-      {currentView === "info" && user?.role === "admin" && (
-        <SystemInfo onViewChange={handleNavigate} currentView={currentView} />
-      )}
-    </>
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+
+        {/* Protected Dashboard Shell */}
+        <Route element={<ProtectedLayout />}>
+          <Route path="/dashboard" element={<Dashboard/>} />
+          <Route path="/dashboard/database" element={<ProjectDatabase />} />
+          <Route path="/dashboard/repository" element={<FileRepository />} />
+          <Route path="/dashboard/profile" element={<UserProfile />} />
+
+          {/* Admin Specific Sub-Routes */}
+          <Route element={<AdminRoute />}>
+            <Route path="/dashboard/management" element={<UserManagement />} />
+            <Route path="/dashboard/logs" element={<ActivityLogs />} />
+            <Route path="/dashboard/info" element={<SystemInfo />} />
+          </Route>
+        </Route>
+
+        {/* Fallback redirect */}
+        <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

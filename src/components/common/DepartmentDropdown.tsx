@@ -41,7 +41,7 @@ export function DepartmentDropdown({
 
       {/* Styled Select Dropdown */}
       <select
-        className="appearance-none bg-slate-50 hover:bg-white border border-slate-200 text-slate-600 hover:text-slate-800 font-bold text-xs pl-9 pr-8 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-[#00aeef] transition-all cursor-pointer shadow-2xs"
+        className="appearance-none bg-white hover:bg-slate-50 border-slate-200 border-1 text-slate-600 hover:text-slate-800 font-bold text-xs pl-9 pr-8 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:border-[#00aeef] transition-all cursor-pointer shadow-2xs"
         value={value}
         onChange={(e) => onChange && onChange(e.target.value)}
         aria-label="Select department"

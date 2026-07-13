@@ -4,11 +4,6 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext"; 
 
 export default function SystemInfo({
-  onViewChange,
-  currentView,
-}: {
-  onViewChange: (view: string) => void;
-  currentView: string;
 }) {
   const { user, users } = useContext(AuthContext)!;
 
@@ -16,12 +11,8 @@ export default function SystemInfo({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 select-none antialiased">
-      <Navbar
-        pageTitle="System Information"
-        subTitle="Info"
-        onViewChange={onViewChange}
-      />
-      <Sidebar activeView={currentView} onViewChange={onViewChange} />
+      <Navbar/>
+      <Sidebar/>
 
       <div className="sm:pl-64 transition-all duration-200">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -106,7 +97,7 @@ export default function SystemInfo({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Primary Sector Divisions</span>
-                  <span className="text-slate-700">4 divisions (SETUP, Scholarships, Services, Projects)</span>
+                  <span className="text-slate-700">4 divisions (SETUP, Scholarships, S&T Services, R&D Projects)</span>
                 </div>
               </div>
             </div>
@@ -127,7 +118,7 @@ export default function SystemInfo({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Regional Director</span>
-                  <span className="text-slate-700">Dir. Romela N. Ratilla</span>
+                  <span className="text-slate-700">Dir. Mark L. Garcia</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Support Email Portal</span>

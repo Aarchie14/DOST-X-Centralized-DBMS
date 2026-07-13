@@ -1,6 +1,8 @@
-import { useState, useContext, FormEvent } from "react";
+import { useState, useContext, type FormEvent } from "react";
 import { AuthContext } from "../context/AuthContext";
 import LogoCW from "../assets/LogoCW.png";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * LoginPage Component
@@ -14,6 +16,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   /**
    * Handles the authentication form submission.
@@ -22,13 +25,58 @@ export default function LoginPage() {
    */
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    // Attempt login and handle response
-    const success = await login(email, password);
+    const normalizedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
+    if (!EMAIL_PATTERN.test(normalizedEmail)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (trimmedPassword.length < 6) {
+      setErrorMessage("Password must be at least 6 characters long.");
+      return;
+    }
+
+    const lockoutUntil = Number(
+      sessionStorage.getItem("login_lockout_until") || "0",
+    );
+    if (Date.now() < lockoutUntil) {
+      const remainingSeconds = Math.max(
+        1,
+        Math.ceil((lockoutUntil - Date.now()) / 1000),
+      );
+      setErrorMessage(
+        `Too many failed attempts. Please try again in ${remainingSeconds}s.`,
+      );
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage("");
+
+    const success = await login(normalizedEmail, trimmedPassword);
 
     if (!success) {
-      alert("Invalid credentials! Try: admin@dost.gov.ph / admin123");
+      const isLocked =
+        Number(sessionStorage.getItem("login_lockout_until") || "0") >
+        Date.now();
+      if (isLocked) {
+        const remainingSeconds = Math.max(
+          1,
+          Math.ceil(
+            (Number(sessionStorage.getItem("login_lockout_until") || "0") -
+              Date.now()) /
+              1000,
+          ),
+        );
+        setErrorMessage(
+          `Too many failed attempts. Please try again in ${remainingSeconds}s.`,
+        );
+      } else {
+        setErrorMessage("Invalid credentials. Please try again.");
+      }
       setIsLoading(false);
     }
   };
@@ -67,7 +115,8 @@ export default function LoginPage() {
             <input
               required
               placeholder="Enter your email"
-              type="email" // Better mobile support
+              type="email"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 rounded-md bg-white/90 focus:outline-none focus:ring-2 focus:ring-sky-300"
@@ -81,11 +130,21 @@ export default function LoginPage() {
               required
               placeholder="Enter your password"
               type="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 rounded-md bg-white/90 focus:outline-none focus:ring-2 focus:ring-sky-300"
             />
           </div>
+
+          {errorMessage && (
+            <p
+              className="text-sm text-amber-100 bg-rose-900/50 rounded-md px-3 py-2 text-left"
+              aria-live="polite"
+            >
+              {errorMessage}
+            </p>
+          )}
 
           {/* Submit Action */}
           <button

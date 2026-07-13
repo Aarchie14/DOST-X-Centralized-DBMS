@@ -10,7 +10,7 @@ const ITEMS_PER_PAGE = 10;
  * Manages project data state, filtering, CRUD operations, 
  * pagination, and report export functionality.
  */
-export function useProjectRecords() {
+export function useProjectDatabase() {
 
   // --- UI STATE ---
   const [searchQuery, setSearchQuery] = useState<string>("");
