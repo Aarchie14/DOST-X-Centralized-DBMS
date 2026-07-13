@@ -1,14 +1,20 @@
 import { Navbar } from "../components/layout/Navbar";
 import { Sidebar } from "../components/layout/Sidebar";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 /**
  * UserProfile Component
  * Renders the active user's details, role, department, and system access rights.
+ * Fully synced with AuthContext for instant name updates and activity logs.
  */
 export default function UserProfile({}) {
-  const { user } = useContext(AuthContext)!;
+  // Destructure updateUser and addLog alongside the active user object
+  const { user, updateUser, addLog } = useContext(AuthContext)!;
+
+  // State for managing inline name editing exclusively
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editableName, setEditableName] = useState(user?.name || "");
 
   if (!user) return null;
 
@@ -21,7 +27,7 @@ export default function UserProfile({}) {
   } else if (user.systemAccess) {
     // Coerce to raw string safely away from TypeScript's compiler constraints
     const cleanString = String(user.systemAccess as unknown);
-    
+
     // Check if it's the specific complex legacy text string: "FULL ACCESS (READ, WRITE, ...)"
     if (cleanString.includes("(") && cleanString.includes(")")) {
       const insideBrackets = cleanString.match(/\(([^)]+)\)/);
@@ -40,6 +46,26 @@ export default function UserProfile({}) {
     }
   }
 
+  // Handle Name Updates across the global system state
+  const handleSaveName = () => {
+    const trimmedName = editableName.trim();
+    if (!trimmedName || trimmedName === user.name) {
+      setIsEditingName(false);
+      return;
+    }
+
+    // A. Update global user array & current session user
+    updateUser(user.email, { name: trimmedName });
+
+    // B. Fire an explicit item tracking status event inside your log
+    addLog(
+      "Profile Update",
+      `User changed display name from "${user.name}" to "${trimmedName}".`,
+    );
+
+    setIsEditingName(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 select-none antialiased">
       <Navbar />
@@ -49,16 +75,73 @@ export default function UserProfile({}) {
         <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
           {/* Card Body */}
           <div className="bg-white border border-slate-200/60 rounded-2xl p-6 md:p-8 shadow-xs space-y-6">
-          
             {/* Brand Header */}
             <div className="flex items-center gap-4 border-b border-slate-100 pb-6">
               <div className="w-16 h-16 rounded-2xl bg-cyan-50 text-[#00aeef] flex items-center justify-center font-bold text-2xl shadow-inner border border-cyan-100/30">
-                {user.name.charAt(0)}
+                {(editableName || user.name).charAt(0)}
               </div>
-              <div>
-                <h2 className="text-lg font-extrabold text-slate-800 leading-tight">
-                  {user.name}
-                </h2>
+              <div className="flex-1">
+                {isEditingName ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      type="text"
+                      value={editableName}
+                      onChange={(e) => setEditableName(e.target.value)}
+                      className="text-base font-semibold text-slate-800 bg-slate-50 border border-slate-300 rounded-lg px-2 py-0.5 focus:outline-hidden focus:border-cyan-500"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveName();
+                        if (e.key === "Escape") {
+                          setEditableName(user.name);
+                          setIsEditingName(false);
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      className="px-2 py-1 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditableName(user.name);
+                        setIsEditingName(false);
+                      }}
+                      className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-extrabold text-slate-800 leading-tight">
+                      {user.name}
+                    </h2>
+                    <button
+                      onClick={() => {
+                        setEditableName(user.name);
+                        setIsEditingName(true);
+                      }}
+                      className="text-slate-400 hover:text-cyan-500 transition-colors cursor-pointer"
+                      title="Edit Name"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
                 <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">
                   {user.role === "admin"
                     ? "System Administrator"
