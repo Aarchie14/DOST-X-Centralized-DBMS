@@ -85,7 +85,7 @@ export function TableToolbar({
               d="M12 4v16m8-8H4"
             />
           </svg>
-          <span>New Record Entry</span>
+          <span>New Database Entry</span>
         </button>
       )}
 
