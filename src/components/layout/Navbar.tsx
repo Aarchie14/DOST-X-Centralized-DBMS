@@ -94,8 +94,8 @@ export function Navbar() {
           {/* Desktop Clock State & Dark Mode Toggle */}
           <div className="hidden md:flex items-center gap-4">
             {/* Flat Clock Box */}
-            <div className="flex items-center gap-1.5 text-slate-900 font-bold text-sm tracking-wide dark:text-slate-200">
-              <svg className="w-4 h-4 text-slate-900 dark:text-slate-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-1.5 text-slate-900 font-bold text-sm tracking-wide dark:text-slate-900">
+              <svg className="w-4 h-4 text-slate-900 dark:text-slate-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>{currentTime || "Loading status..."}</span>
