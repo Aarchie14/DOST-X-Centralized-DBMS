@@ -11,6 +11,7 @@
 1. **Default Light Mode**
    - Configured theme initialization logic in `index.html` to default the application to Light Mode on first-time visits, overriding browser or system preferences.
    - Synchronized toggle state in `Navbar.tsx` seamlessly.
+   - Updated the `logout` function in `AuthContext.tsx` to reset the theme to `"light"` in `localStorage` and remove the `"dark"` class from `document.documentElement` immediately. This ensures any subsequent login session starts in Light Mode by default regardless of the previous user's session theme choice.
 
 2. **File Size Tracking in File Repository**
    - Developed a general-purpose byte formatting utility `formatFileSize` in `src/utils/fileUtils.ts`.

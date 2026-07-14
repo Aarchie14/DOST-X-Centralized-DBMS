@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **README.md** — rewrote project landing page (replaced broken merge-conflict content) with quick start, demo credentials, and doc links.
 
 ### Changed
-- **Default theme behavior** — Changed the theme initialization logic in `index.html` to default to light mode on the first visit (ignoring device system preferences for dark mode).
+- **Default theme behavior** — Changed the theme initialization logic in `index.html` to default to light mode on the first visit (ignoring device system preferences for dark mode). Reset theme to light mode on logout so that next sessions always start in light mode.
 
 ### Fixed
 - **Hydration warning** — removed stray `{" "}` whitespace text node between `</thead>` and `</table>` in `UserTable.tsx`.

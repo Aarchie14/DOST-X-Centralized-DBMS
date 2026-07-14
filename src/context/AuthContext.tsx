@@ -142,6 +142,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user) addLog("User Logout", "User logged out of the system.");
     setUser(null);
     sessionStorage.removeItem(STORAGE_KEYS.sessionUser);
+    localStorage.setItem("theme", "light");
+    document.documentElement.classList.remove("dark");
   };
 
   const addUser = (newUser: User) => {
