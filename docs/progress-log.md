@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-07-15 — Default Light Mode + File Size Tracking
+
+### What Shipped
+
+1. **Default Light Mode**
+   - Configured theme initialization logic in `index.html` to default the application to Light Mode on first-time visits, overriding browser or system preferences.
+   - Synchronized toggle state in `Navbar.tsx` seamlessly.
+
+2. **File Size Tracking in File Repository**
+   - Developed a general-purpose byte formatting utility `formatFileSize` in `src/utils/fileUtils.ts`.
+   - Updated the `FileRecord` types in the hooks `useFileRepository.ts` and UI component `FileTable.tsx` to support the new `fileSize` field.
+   - Introduced a new **Size** column in `FileTable.tsx` and adjusted layout column widths.
+   - Modified `handleFileUpload` in `FileRepository.tsx` to automatically compute and format file sizes on client-side uploads.
+   - Updated project documentation (`docs/user-guide.md`, `docs/CHANGELOG.md`) to reflect the new column and theme behavior.
+
+### What's Blocked
+
+- Nothing currently blocked.
+
+### What's Next
+
+- Backend API integration (authentication, database, file storage).
+- Responsive mobile layout improvements.
+- Automated testing setup (unit tests, integration tests).
+- Deployment to staging environment.
+
+---
+
 ## 2026-07-14 — UI Overhaul + Unit-Based Access Control
 
 ### What Shipped

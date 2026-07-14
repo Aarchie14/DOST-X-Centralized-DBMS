@@ -24,7 +24,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<string>("");
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    return document.documentElement.classList.contains("dark");
+    return localStorage.getItem("theme") === "dark";
   });
 
   const toggleDarkMode = () => {

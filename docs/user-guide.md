@@ -94,7 +94,7 @@ The File Repository page allows managing uploaded data files.
 
 ### Viewing Files
 
-- Files are displayed in a table with columns for file name, department, sector, and last accessed date.
+- Files are displayed in a table with columns for file name, size, department, sector, and last accessed date.
 - Use the search bar and department filter to find specific files.
 
 ### Downloading Files
@@ -161,7 +161,7 @@ The following pages are only accessible to users with the `admin` role. Staff me
 
 - Click the **moon icon** (☽) in the top navigation bar to switch to dark mode.
 - Click the **sun icon** (☀) to switch back to light mode.
-- Your preference is saved automatically and persists across sessions.
+- By default, the application opens in **light mode** on the first visit. Your preference is saved automatically to `localStorage` and persists across sessions.
 - Dark mode uses a deep dark blue palette designed for reduced eye strain while maintaining visual hierarchy and brand identity.
 
 ---

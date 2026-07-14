@@ -1,4 +1,4 @@
-import { useState, useContext, type FormEvent } from "react";
+import { useState, useEffect, useContext, type FormEvent } from "react";
 import { AuthContext } from "../context/AuthContext";
 import LogoCW from "../assets/LogoCW.png";
 
@@ -17,6 +17,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Enforce light mode on login screen
+  useEffect(() => {
+    document.documentElement.classList.remove("dark");
+    return () => {
+      if (localStorage.getItem("theme") === "dark") {
+        document.documentElement.classList.add("dark");
+      }
+    };
+  }, []);
 
   /**
    * Handles the authentication form submission.
