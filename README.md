@@ -1,78 +1,52 @@
-<<<<<<< HEAD
-# React + TypeScript + Vite
+# DOST-X Centralized Database Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<p align="center">
+  <img src="src/assets/LogoCW.png" alt="DOST-X Logo" width="500" />
+</p>
 
-Currently, two official plugins are available:
+A centralized web-based database system for the Department of Science and Technology Region X (DOST-X) that enables staff to view, add, edit, search, import, and export project records, with a file repository for storing Excel/CSV datasets.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/punyeeta/DOST-X-Centralized-DBMS.git
+cd DOST-X-Centralized-DBMS
+npm install
+npm run dev          # starts dev server at http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> See [docs/setup.md](docs/setup.md) for full environment setup, build, and deployment instructions.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Demo Credentials
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-=======
-# DOST-X-Centralized-DBMS
-A centralized web-based database system that will enable staff to view, add, edit, search, import, and export records, with a file repository for storing Excel/CSV files.
->>>>>>> 5cb2376dea5832440e16d6447184ce841c428d8d
+| Role  | Email                | Password   |
+|-------|----------------------|------------|
+| Admin | `admin@dost.gov.ph`  | `admin123` |
+| Staff | `user@dost.gov.ph`   | `user123`  |
+
+## Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [docs/architecture.md](docs/architecture.md) | System architecture, folder structure, data model, and auth flow |
+| [docs/setup.md](docs/setup.md) | Clone → install → run → build → deploy instructions |
+| [docs/user-guide.md](docs/user-guide.md) | End-user guide for staff and administrators |
+| [docs/progress-log.md](docs/progress-log.md) | Dated progress entries for supervisor tracking |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | Version-tagged list of all notable changes |
+| [docs/turnover-checklist.md](docs/turnover-checklist.md) | Handover checklist — known issues, pending work, contacts |
+| [docs/darkmode_design.md](docs/darkmode_design.md) | Dark mode design system specification |
+| [docs/unit_based_access.md](docs/unit_based_access.md) | Unit-based access control implementation spec |
+
+## Tech Stack
+
+- **Frontend:** React 19 + TypeScript 6
+- **Build Tool:** Vite 8
+- **Styling:** Tailwind CSS v4 (via `@tailwindcss/vite` plugin)
+- **Routing:** React Router v7
+- **Font:** Google Sans Flex (variable)
+
+## License
+
+This project is developed under the DOST-X internship program. All rights reserved.
