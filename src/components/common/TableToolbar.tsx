@@ -14,6 +14,8 @@ interface TableToolbarProps {
   onExportCSV?: () => void;
   onExportExcel?: () => void;
   userRole?: "admin" | "user";
+  /** When set, the department dropdown renders as a locked badge for this unit. */
+  lockedDepartment?: string;
 }
 
 /**
@@ -29,6 +31,7 @@ export function TableToolbar({
   onExportCSV,
   onExportExcel,
   userRole,
+  lockedDepartment,
 }: TableToolbarProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -60,6 +63,7 @@ export function TableToolbar({
       <DepartmentDropdown
         value={selectedDepartment}
         onChange={onDepartmentChange}
+        lockedTo={lockedDepartment}
       />
       {/* SECTION: Administrative Actions */}
       {/* Render "New Record" button only for admins when action is provided */}

@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { INITIAL_RECORDS } from "../config/mockData";
 import type { ProjectRecord } from "../config/constants";
 import { AuthContext } from "../context/AuthContext";
+import { scopeToUnit, resolveInitialDepartment } from "../utils/unitAccess";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -11,10 +12,13 @@ const ITEMS_PER_PAGE = 10;
  * pagination, and report export functionality.
  */
 export function useProjectDatabase() {
+  const { addLog, user } = useContext(AuthContext)!;
 
   // --- UI STATE ---
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("All department");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>(() =>
+    resolveInitialDepartment(user, "All department"),
+  );
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
@@ -30,7 +34,9 @@ export function useProjectDatabase() {
     status: "" as any,
   });
   const [records, setRecords] = useState<ProjectRecord[]>(INITIAL_RECORDS);
-  const { addLog } = useContext(AuthContext)!;
+
+  /** Records the current user is allowed to see (unit-scoped for non-admins). */
+  const visibleRecords = scopeToUnit(records, user);
   
 // --- NOTIFICATION STATE ---
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
@@ -153,7 +159,7 @@ const openModalImmediately = () => {
       addLog("Project Record Created", `Created new project: "${newProject.name}" (ID #${newRecordEntry.id})`);
 
       // Navigate to last page after adding
-      const totalFilteredCount = updatedRecords.filter((rec) => {
+      const totalFilteredCount = scopeToUnit(updatedRecords, user).filter((rec) => {
         const matchesDept = selectedDepartment === "All department" || rec.department === selectedDepartment;
         const matchesSearch = rec.name.toLowerCase().includes(searchQuery.toLowerCase()) || rec.sectorCategory.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesDept && matchesSearch;
@@ -168,9 +174,9 @@ const openModalImmediately = () => {
   /** Resolves which records to export: selected subset or all records */
   const getExportRecords = () => {
     if (selectedIds.size > 0) {
-      return records.filter((rec) => selectedIds.has(rec.id));
+      return visibleRecords.filter((rec) => selectedIds.has(rec.id));
     }
-    return records;
+    return visibleRecords;
   };
 
   /** Converts the export record list into a CSV-formatted string */
@@ -253,7 +259,7 @@ const openModalImmediately = () => {
   };
 
   // --- DERIVED DATA ---
-  const sortedAndFilteredRecords = records
+  const sortedAndFilteredRecords = visibleRecords
     .filter((rec) => {
       const matchesDept = selectedDepartment === "All department" || rec.department === selectedDepartment;
       const matchesSearch = rec.name.toLowerCase().includes(searchQuery.toLowerCase()) || rec.sectorCategory.toLowerCase().includes(searchQuery.toLowerCase());

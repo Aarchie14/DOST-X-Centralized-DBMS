@@ -21,7 +21,7 @@ export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
               <th className="py-3 px-6 w-[15%]">System Access</th>
               <th className="py-3 px-6 text-center w-28">Actions</th>
             </tr>
-          </thead>{" "}
+          </thead>
         </table>
       </div>
 

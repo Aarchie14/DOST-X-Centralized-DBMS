@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { scopeToUnit, resolveInitialDepartment } from "../utils/unitAccess";
+
 /**
  * Interface representing a file entry within the repository.
  */
@@ -15,6 +18,8 @@ interface FileRecord {
  * Manages the state and filtering logic for the departmental file repository.
  */
 export function useFileRepository() {
+  const { user } = useContext(AuthContext)!;
+
   // --- DATA STATE ---
   const [files, setFiles] = useState<FileRecord[]>([
     { id: 1, fileName: "SETUP Food Processing.csv", department: "MIS", sectorCategory: "SETUP (MSMEs)", lastAccessed: "07-07-2026" },
@@ -22,7 +27,9 @@ export function useFileRepository() {
 
   // --- UI STATE ---
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("All department");
+  const [selectedDepartment, setSelectedDepartment] = useState(() =>
+    resolveInitialDepartment(user, "All department"),
+  );
 
   /**
    * Removes a file record from the repository by its unique ID.
@@ -36,7 +43,9 @@ export function useFileRepository() {
   /**
    * Computed list of files based on active search criteria and department filters.
    */
-  const filteredFiles = files.filter(f => {
+  const visibleFiles = scopeToUnit(files, user);
+
+  const filteredFiles = visibleFiles.filter(f => {
     const matchesDept = selectedDepartment === "All department" || f.department === selectedDepartment;
     const matchesSearch = f.fileName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesDept && matchesSearch;

@@ -11,12 +11,14 @@ import { useEffect, useState } from "react";
 import { useContext } from "react"; 
 import { AuthContext } from "../context/AuthContext";
 import type { ProjectRecord } from "../config/constants";
+import { getUnitLock } from "../utils/unitAccess";
 import { useLocation, useNavigate } from "react-router-dom"; // Added useLocation and kept useNavigate
 
 export default function ProjectDatabase() {
   const location = useLocation(); // Hook to intercept the router state
   const navigate = useNavigate();
   const { user } = useContext(AuthContext)!;
+  const lockedDepartment = getUnitLock(user) ?? undefined;
 
   // State to track the currently opened project database
   const [selectedProject, setSelectedProject] = useState<ProjectRecord | null>(null);
@@ -110,6 +112,7 @@ export default function ProjectDatabase() {
                 onNewRecordClick={handleOpenCreateModal}
                 onExportCSV={handleExportCSV}
                 onExportExcel={handleExportExcel}
+                lockedDepartment={lockedDepartment}
               />
 
               {/* Selection indicator */}

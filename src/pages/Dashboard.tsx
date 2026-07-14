@@ -6,6 +6,7 @@ import herorBg from "../assets/hheror.bg.png";
 import { departmentStats } from "../Data/departmentData";
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { getUnitLock, resolveInitialDepartment } from "../utils/unitAccess";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
@@ -16,8 +17,10 @@ export default function Dashboard() {
   if (!user) return null;
 
   // 2. STATE INTERFACES LOGIC HOOKS
-  const [selectedDepartment, setSelectedDepartment] =
-    useState<string>("All department");
+  const lockedDepartment = getUnitLock(user) ?? undefined;
+  const [selectedDepartment, setSelectedDepartment] = useState<string>(() =>
+    resolveInitialDepartment(user, "All department"),
+  );
 
   // Resolve the active data based on current state selection
   const currentStats =
@@ -294,6 +297,7 @@ export default function Dashboard() {
                 <DepartmentDropdown
                   value={selectedDepartment}
                   onChange={(val) => setSelectedDepartment(val)}
+                  lockedTo={lockedDepartment}
                 />
               </div>
 

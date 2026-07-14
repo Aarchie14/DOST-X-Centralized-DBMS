@@ -7,16 +7,19 @@ import { Toast, type ToastNotification } from "../components/common/Toast";
 import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal";
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { scopeToUnit, getUnitLock, resolveInitialDepartment } from "../utils/unitAccess";
 
 export default function FileRepository({
 }) {
   // 1. AuthContext Hook to access user role, logging, and authentication functions
   const { user, addLog } = useContext(AuthContext)!;
+  const lockedDepartment = getUnitLock(user) ?? undefined;
 
   // STATE HOOKS
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] =
-    useState("All department");
+  const [selectedDepartment, setSelectedDepartment] = useState(() =>
+    resolveInitialDepartment(user, "All department"),
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [notification, setNotification] = useState<ToastNotification | null>(
     null,
@@ -58,7 +61,9 @@ export default function FileRepository({
   };
 
   // 2. DERIVED DATA
-  const filteredFiles = files.filter((file) => {
+  const visibleFiles = scopeToUnit(files, user);
+
+  const filteredFiles = visibleFiles.filter((file) => {
     const matchesSearch = file.fileName
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -150,6 +155,7 @@ export default function FileRepository({
             onSearchChange={handleSearchChange}
             selectedDepartment={selectedDepartment}
             onDepartmentChange={handleDeptChange}
+            lockedDepartment={lockedDepartment}
           />
 
           {/* SECTION: File Listing Table */}
