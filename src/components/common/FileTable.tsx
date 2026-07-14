@@ -4,6 +4,7 @@
 interface FileRecord {
   id: number;
   fileName: string;
+  fileSize: string;
   department: string;
   lastAccessed: string;
   userRole?: "admin" | "user";
@@ -40,10 +41,11 @@ export function FileTable({
         {/* SECTION: Table Header */}
         <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
           <tr className="text-slate-500 text-xs uppercase tracking-wider">
-            <th className="px-6 py-4 font-semibold w-1/3">File Name</th>
-            <th className="px-6 py-4 font-semibold w-1/4">Department</th>
-            <th className="px-6 py-4 font-semibold w-1/4">Last Accessed</th>
-            <th className="px-6 py-4 font-semibold w-1/6 text-center">
+            <th className="px-6 py-4 font-semibold w-[35%]">File Name</th>
+            <th className="px-6 py-4 font-semibold w-[15%]">Size</th>
+            <th className="px-6 py-4 font-semibold w-[18%]">Department</th>
+            <th className="px-6 py-4 font-semibold w-[18%]">Last Accessed</th>
+            <th className="px-6 py-4 font-semibold w-[14%] text-center">
               Action
             </th>
           </tr>
@@ -58,6 +60,9 @@ export function FileTable({
             >
               <td className="px-6 py-2 text-sm font-medium text-slate-700 truncate">
                 {file.fileName}
+              </td>
+              <td className="px-6 py-2 text-sm text-slate-600 truncate">
+                {file.fileSize}
               </td>
               <td className="px-6 py-2 text-sm text-slate-600">
                 {file.department}
@@ -121,7 +126,7 @@ export function FileTable({
               <tr key={`empty-${index}`} className="h-[52px]">
                 
                 {/* Remove borders from empty rows so they don't look like cut-off lines */}
-                <td colSpan={4} className="border-none">
+                <td colSpan={5} className="border-none">
                   &nbsp;
                 </td>
               </tr>

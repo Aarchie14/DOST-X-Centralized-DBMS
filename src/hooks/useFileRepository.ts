@@ -8,6 +8,7 @@ import { scopeToUnit, resolveInitialDepartment } from "../utils/unitAccess";
 interface FileRecord {
   id: number;
   fileName: string;
+  fileSize: string;
   department: string;
   sectorCategory: string;
   lastAccessed: string;
@@ -22,7 +23,7 @@ export function useFileRepository() {
 
   // --- DATA STATE ---
   const [files, setFiles] = useState<FileRecord[]>([
-    { id: 1, fileName: "SETUP Food Processing.csv", department: "MIS", sectorCategory: "SETUP (MSMEs)", lastAccessed: "07-07-2026" },
+    { id: 1, fileName: "SETUP Food Processing.csv", fileSize: "124.5 KB", department: "MIS", sectorCategory: "SETUP (MSMEs)", lastAccessed: "07-07-2026" },
   ]);
 
   // --- UI STATE ---

@@ -8,6 +8,7 @@ import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal";
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { scopeToUnit, getUnitLock, resolveInitialDepartment } from "../utils/unitAccess";
+import { formatFileSize } from "../utils/fileUtils";
 
 export default function FileRepository({
 }) {
@@ -35,6 +36,7 @@ export default function FileRepository({
     {
       id: 1,
       fileName: "SETUP Food Processing Facility Upgrade.csv",
+      fileSize: "124.5 KB",
       department: "MIS",
       sectorCategory: "SETUP (MSMEs)",
       lastAccessed: "07-07-2026",
@@ -42,6 +44,7 @@ export default function FileRepository({
     {
       id: 2,
       fileName: "S&T_Scholarship(2025-2026).xlsx",
+      fileSize: "1.2 MB",
       department: "SCC",
       sectorCategory: "Scholarship",
       lastAccessed: "07-07-2026",
@@ -83,6 +86,7 @@ export default function FileRepository({
     const newFile = {
       id: Date.now(),
       fileName: file.name,
+      fileSize: formatFileSize(file.size),
       department: department,
       sectorCategory: "Uploaded",
       lastAccessed: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
