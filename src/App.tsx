@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
+import { SidebarProvider } from "./context/SidebarContext";
 import { useInactivityLogout } from "./hooks/useInactivityLogout";
 
 // Pages
@@ -43,29 +44,31 @@ export default function App() {
   useInactivityLogout(handleLogout, 900000);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+    <SidebarProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
 
-        {/* Protected Dashboard Shell */}
-        <Route element={<ProtectedLayout />}>
-          <Route path="/dashboard" element={<Dashboard/>} />
-          <Route path="/dashboard/database" element={<ProjectDatabase />} />
-          <Route path="/dashboard/repository" element={<FileRepository />} />
-          <Route path="/dashboard/profile" element={<UserProfile />} />
+          {/* Protected Dashboard Shell */}
+          <Route element={<ProtectedLayout />}>
+            <Route path="/dashboard" element={<Dashboard/>} />
+            <Route path="/dashboard/database" element={<ProjectDatabase />} />
+            <Route path="/dashboard/repository" element={<FileRepository />} />
+            <Route path="/dashboard/profile" element={<UserProfile />} />
 
-          {/* Admin Specific Sub-Routes */}
-          <Route element={<AdminRoute />}>
-            <Route path="/dashboard/management" element={<UserManagement />} />
-            <Route path="/dashboard/logs" element={<ActivityLogs />} />
-            <Route path="/dashboard/info" element={<SystemInfo />} />
+            {/* Admin Specific Sub-Routes */}
+            <Route element={<AdminRoute />}>
+              <Route path="/dashboard/management" element={<UserManagement />} />
+              <Route path="/dashboard/logs" element={<ActivityLogs />} />
+              <Route path="/dashboard/info" element={<SystemInfo />} />
+            </Route>
           </Route>
-        </Route>
 
-        {/* Fallback redirect */}
-        <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Fallback redirect */}
+          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
+        </Routes>
+      </BrowserRouter>
+    </SidebarProvider>
   );
 }

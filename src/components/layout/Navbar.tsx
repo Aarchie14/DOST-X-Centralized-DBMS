@@ -22,7 +22,22 @@ const NAVIGATION_ROUTES: NavItem[] = [
 export function Navbar() {
   const { logout, user } = useContext(AuthContext)!;
   const [isOpen, setIsOpen] = useState<boolean>(false);
-const [currentTime, setCurrentTime] = useState<string>("");
+  const [currentTime, setCurrentTime] = useState<string>("");
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    return document.documentElement.classList.contains("dark");
+  });
+
+  const toggleDarkMode = () => {
+    const nextMode = !isDarkMode;
+    setIsDarkMode(nextMode);
+    if (nextMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   const location = useLocation();
 
@@ -76,12 +91,35 @@ const [currentTime, setCurrentTime] = useState<string>("");
             </div>
           </div>
 
-          {/* Desktop Clock State */}
-          <div className="hidden md:flex items-center gap-1 text-black font-medium text-sm tracking-wide">
-            <svg className="w-4 h-4 text-slate-800 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>{currentTime || "Loading status..."}</span>
+          {/* Desktop Clock State & Dark Mode Toggle */}
+          <div className="hidden md:flex items-center gap-4">
+            {/* Flat Clock Box */}
+            <div className="flex items-center gap-1.5 text-slate-900 font-bold text-sm tracking-wide dark:text-slate-200">
+              <svg className="w-4 h-4 text-slate-900 dark:text-slate-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{currentTime || "Loading status..."}</span>
+            </div>
+
+            {/* Flat Dark Mode Toggle Button */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-1.5 rounded-lg bg-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-all cursor-pointer flex items-center justify-center"
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              aria-label="Toggle Dark Mode"
+            >
+              {isDarkMode ? (
+                // Sun Icon (when in dark mode, click to go light)
+                <svg className="w-4.5 h-4.5 text-amber-500 transition-transform hover:rotate-45" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                </svg>
+              ) : (
+                // Moon Icon (when in light mode, click to go dark)
+                <svg className="w-4.5 h-4.5 text-slate-600 transition-transform hover:-rotate-12" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
           </div>
 
           {/* Mobile Menu Toggle Button */}
@@ -101,7 +139,7 @@ const [currentTime, setCurrentTime] = useState<string>("");
 
       {/* MOBILE ONLY: Dropdown Panel */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-slate-100 px-2 pt-2 pb-4 space-y-1 shadow-inner">
+        <div className="md:hidden bg-white border-t border-slate-100 px-2 pt-2 pb-4 space-y-1 shadow-inner dark:bg-slate-900 dark:border-slate-800">
           {allowedNavItems.map((item) => (
             <NavLink
               key={item.path}
@@ -110,19 +148,29 @@ const [currentTime, setCurrentTime] = useState<string>("");
               onClick={() => setIsOpen(false)}
               className={({ isActive }) =>
                 `w-full text-left block px-3 py-2 rounded-md text-base font-bold transition-colors cursor-pointer ${
-                  isActive ? "bg-cyan-50 text-[#00aeef]" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  isActive ? "bg-cyan-50 text-[#00aeef] dark:bg-[#00aeef]/10" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                 }`
               }
             >
               {item.label}
             </NavLink>
           ))}
+          
+          {/* Mobile Theme Toggle Button */}
+          <button
+            onClick={toggleDarkMode}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            <span>Theme Mode</span>
+            <span className="text-sm font-extrabold text-[#00aeef]">{isDarkMode ? "🌙 Dark Mode" : "☀️ Light Mode"}</span>
+          </button>
+
           <button
             onClick={() => {
               logout();
               setIsOpen(false);
             }}
-            className="w-full text-left block px-3 py-2 mt-2 rounded-md text-base font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer border-t border-slate-100"
+            className="w-full text-left block px-3 py-2 mt-2 rounded-md text-base font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors cursor-pointer border-t border-slate-100 dark:border-slate-800"
           >
             Logout
           </button>

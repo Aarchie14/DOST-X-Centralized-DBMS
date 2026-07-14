@@ -1,5 +1,413 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: "Google Sans Flex", sans-serif;
   --color-cyan-brand: #00aeef;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Global Sidebar responsive offsets */
+@media (min-width: 640px) {
+  /* Default: Sidebar is collapsed/minimized (width is 5rem / w-20) */
+  div.min-h-screen > div.sm\:pl-64 {
+    padding-left: 5rem !important;
+    transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  nav.md\:pl-60 {
+    padding-left: 5rem !important;
+    transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* When Sidebar is persistently expanded (body.sidebar-expanded is active) */
+  body.sidebar-expanded div.min-h-screen > div.sm\:pl-64 {
+    padding-left: 17.5rem !important;
+  }
+  body.sidebar-expanded nav.md\:pl-60 {
+    padding-left: 17.5rem !important;
+  }
+}
+
+/* --- Global Dark Mode Design System Override (Deep Dark Blue Palette) --- */
+html.dark {
+  --bg-canvas:      #0A0E1A; /* page background, the "floor" */
+  --bg-surface:     #10162A; /* sidebar, table body, cards */
+  --bg-elevated:    #171F38; /* table header, modals, dropdowns, popovers */
+  --bg-hover:       #1F2944; /* row hover, list item hover */
+  --bg-active:      #253262; /* selected/active row or nav item */
+
+  --border-subtle:  rgba(148, 163, 196, 0.08); /* row dividers */
+  --border-default: rgba(148, 163, 196, 0.14); /* card outlines, input borders */
+  --border-strong:  rgba(148, 163, 196, 0.24); /* focus rings, active outlines */
+
+  --text-primary:   #E7ECF7; /* headings, primary labels */
+  --text-secondary: #9AA7C7; /* body text, dates, secondary labels */
+  --text-tertiary:  #6B7797; /* placeholders, disabled, timestamps */
+
+  --accent:         #4C7DFF;
+  --accent-hover:   #6B92FF;
+  --accent-muted:   rgba(76, 125, 255, 0.14); /* active nav bg, subtle highlight */
+
+  --status-success:      #34D399;
+  --status-success-bg:   rgba(52, 211, 153, 0.12);
+  --status-warning:      #FBBF24;
+  --status-warning-bg:   rgba(251, 191, 36, 0.12);
+  --status-danger:       #F87171;
+  --status-danger-bg:    rgba(248, 113, 113, 0.12);
+}
+
+/* Surfaces Elevation Scales */
+html.dark body,
+html.dark div.min-h-screen {
+  background-color: var(--bg-canvas) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark aside,
+html.dark nav {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-default) !important;
+}
+
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: var(--bg-canvas) !important;
+}
+
+html.dark .bg-white {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-default) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark .bg-slate-50\/50 {
+  background-color: rgba(16, 22, 42, 0.4) !important;
+}
+
+/* Typography Color Overrides */
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-black,
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark th {
+  color: var(--text-primary) !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark td {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .text-slate-400 {
+  color: var(--text-tertiary) !important;
+}
+
+/* Border & Divider Overrides */
+html.dark .border-slate-200,
+html.dark .border-slate-200\/60,
+html.dark .border-slate-100,
+html.dark .divide-y > * {
+  border-color: var(--border-subtle) !important;
+}
+
+/* Form Controls & Dropdowns */
+html.dark input,
+html.dark select,
+html.dark textarea,
+html.dark option {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-default) !important;
+}
+
+html.dark input:focus,
+html.dark select:focus,
+html.dark textarea:focus {
+  border-color: var(--border-strong) !important;
+  outline: none !important;
+}
+
+/* Custom Checkbox Design */
+html.dark input[type="checkbox"] {
+  appearance: none !important;
+  background: transparent !important;
+  border: 1.5px solid var(--border-default) !important;
+  border-radius: 4px !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  cursor: pointer !important;
+  transition: all 120ms !important;
+  position: relative !important;
+}
+
+html.dark input[type="checkbox"]:checked {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23F5F8FF'%3e%3cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3e%3c/svg%3e") !important;
+  background-size: 100% 100% !important;
+}
+
+/* Primary Accent & CTA Buttons */
+html.dark .bg-\[\#00aeef\],
+html.dark .bg-cyan-500,
+html.dark button.bg-\[\#00aeef\] {
+  background-color: var(--accent) !important;
+  color: #F5F8FF !important;
+  border: none !important;
+}
+
+html.dark .bg-\[\#00aeef\]:hover,
+html.dark .bg-cyan-500:hover,
+html.dark button.bg-\[\#00aeef\]:hover {
+  background-color: var(--accent-hover) !important;
+}
+
+/* Secondary Button Overrides (Export CTAs) */
+html.dark .bg-emerald-500,
+html.dark button.bg-emerald-600 {
+  background-color: transparent !important;
+  border: 1px solid var(--border-default) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: none !important;
+}
+
+html.dark .bg-emerald-500:hover,
+html.dark button.bg-emerald-600:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-strong) !important;
+}
+
+html.dark .bg-emerald-500 svg,
+html.dark button.bg-emerald-600 svg {
+  stroke: var(--text-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+html.dark .bg-emerald-500:hover svg,
+html.dark button.bg-emerald-600:hover svg {
+  stroke: var(--text-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Table Specific Layout Rules */
+html.dark thead tr {
+  background-color: var(--bg-elevated) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+html.dark thead th {
+  background-color: var(--bg-elevated) !important;
+  color: var(--text-secondary) !important;
+  letter-spacing: 0.03em !important;
+  text-transform: uppercase !important;
+}
+
+html.dark tr {
+  background-color: var(--bg-surface) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  transition: background-color 120ms ease-in-out !important;
+}
+
+html.dark tr.hover\:bg-sky-50\/20:hover,
+html.dark tr.hover\:bg-sky-50\/20:hover td,
+html.dark tbody tr:hover,
+html.dark tbody tr:hover td {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Database Detail Views */
+html.dark .text-cyan-600 {
+  color: var(--accent) !important;
+}
+html.dark .text-cyan-600:hover {
+  color: var(--accent-hover) !important;
+}
+
+/* Sidebar Styling Rules */
+html.dark aside a.bg-\[\#00aeef\],
+html.dark aside a[class*="bg-[#00aeef]"] {
+  background-color: var(--accent-muted) !important;
+  color: var(--accent) !important;
+  box-shadow: none !important;
+}
+
+html.dark aside a.bg-\[\#00aeef\] span,
+html.dark aside a[class*="bg-[#00aeef]"] span {
+  color: var(--accent) !important;
+}
+
+html.dark aside a:not(.bg-\[\#00aeef\]):not([class*="bg-[#00aeef]"]) {
+  color: var(--text-secondary) !important;
+}
+
+html.dark aside a:not(.bg-\[\#00aeef\]):not([class*="bg-[#00aeef]"]) span {
+  color: var(--text-tertiary) !important;
+}
+
+html.dark aside a:not(.bg-\[\#00aeef\]):not([class*="bg-[#00aeef]"]):hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark aside a:not(.bg-\[\#00aeef\]):not([class*="bg-[#00aeef]"]):hover span {
+  color: var(--accent) !important;
+}
+
+html.dark aside div.border-slate-200 {
+  border-color: var(--border-subtle) !important;
+}
+
+html.dark aside button {
+  color: var(--text-secondary) !important;
+}
+
+html.dark aside button:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Unified Action Icons */
+html.dark button.p-1\.5 {
+  background-color: var(--bg-elevated) !important;
+  color: var(--text-secondary) !important;
+  border-radius: 0.5rem !important;
+  transition: all 120ms ease-in-out !important;
+}
+
+html.dark button.p-1\.5:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark button.p-1\.5.hover\:text-rose-600:hover,
+html.dark button.p-1\.5:has(svg.text-rose-500):hover,
+html.dark button.p-1\.5.hover\:bg-rose-50:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--status-danger) !important;
+}
+
+/* Status Badges */
+html.dark span.bg-green-500\/10 {
+  background-color: var(--status-success-bg) !important;
+  color: var(--status-success) !important;
+  border: 1px solid rgba(52, 211, 153, 0.2) !important;
+}
+
+html.dark span.bg-amber-500\/10 {
+  background-color: var(--status-warning-bg) !important;
+  color: var(--status-warning) !important;
+  border: 1px solid rgba(251, 191, 36, 0.2) !important;
+}
+
+html.dark span.bg-sky-500\/10 {
+  background-color: var(--accent-muted) !important;
+  color: var(--accent) !important;
+  border: 1px solid rgba(76, 125, 255, 0.2) !important;
+}
+
+/* User Roles / System Access Tags */
+html.dark span.bg-rose-50 {
+  background-color: var(--status-danger-bg) !important;
+  color: var(--status-danger) !important;
+  border: 1px solid rgba(248, 113, 113, 0.2) !important;
+}
+
+html.dark span.bg-amber-50 {
+  background-color: var(--status-warning-bg) !important;
+  color: var(--status-warning) !important;
+  border: 1px solid rgba(251, 191, 36, 0.2) !important;
+}
+
+html.dark span.bg-slate-100 {
+  background-color: var(--bg-elevated) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-default) !important;
+}
+
+/* Soft Elevation Shadows */
+html.dark .shadow-xs,
+html.dark .shadow-sm,
+html.dark .shadow-2xs,
+html.dark .shadow-md,
+html.dark .shadow-lg {
+  box-shadow: 0 4px 12px rgba(10, 14, 26, 0.5) !important;
+}
+
+/* Overlay & Modal Specs */
+html.dark .fixed.inset-0.bg-black\/50,
+html.dark .bg-slate-900\/50 {
+  background-color: rgba(6, 9, 17, 0.8) !important;
+}
+
+html.dark .fixed.inset-0 .bg-white,
+html.dark .fixed.inset-0 .bg-slate-50 {
+  background-color: var(--bg-elevated) !important;
+  border: 1px solid var(--border-default) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Toast Speeds & Colors */
+html.dark .toast-container,
+html.dark div[role="alert"] {
+  background-color: var(--bg-elevated) !important;
+  border: 1px solid var(--border-default) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Dashboard Statistics Accents */
+html.dark .bg-cyan-50 {
+  background-color: var(--accent-muted) !important;
+  color: var(--accent) !important;
+}
+
+html.dark .bg-emerald-50 {
+  background-color: var(--status-success-bg) !important;
+  color: var(--status-success) !important;
+}
+
+html.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  color: #6366f1 !important;
+}
+
+/* Upload Dropzones */
+html.dark .border-dashed {
+  border-color: var(--border-strong) !important;
+}
+html.dark .hover\:bg-sky-50\/50:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Dashboard Hero Banner Overlays */
+html.dark div[style*="hheror.bg.png"] {
+  border-bottom-color: var(--border-subtle) !important;
+}
+html.dark div[style*="hheror.bg.png"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(10, 14, 26, 0.6) !important; /* Dim light banner image */
+  z-index: 1;
+  pointer-events: none;
+}
+html.dark div[style*="hheror.bg.png"] > div.relative {
+  z-index: 2;
 }

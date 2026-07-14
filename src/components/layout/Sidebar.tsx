@@ -1,7 +1,8 @@
-import { useState, useContext } from "react"; 
+import { useState, useContext, useEffect } from "react"; 
 import type { ReactElement } from "react";
 import LogoDD from "../../assets/LogoDD.png";
 import { AuthContext } from "../../context/AuthContext";
+import { useSidebar } from "../../context/SidebarContext";
 import { NavLink } from "react-router-dom";
 
 interface NavItem {
@@ -12,8 +13,19 @@ interface NavItem {
 
 export function Sidebar() {
   const { logout, user } = useContext(AuthContext)!;
-  // State to manage whether the account drawer options (like logout) are expanded
+  const { isCollapsed, setIsCollapsed, isHovered, setIsHovered } = useSidebar();
   const [isProfileExpanded, setIsProfileExpanded] = useState<boolean>(false);
+
+  const isOpen = !isCollapsed || isHovered;
+
+  // Track body class to dynamically adjust main page layout paddings
+  useEffect(() => {
+    if (isCollapsed) {
+      document.body.classList.remove("sidebar-expanded");
+    } else {
+      document.body.classList.add("sidebar-expanded");
+    }
+  }, [isCollapsed]);
 
   const navItems: NavItem[] = [
     {
@@ -167,9 +179,42 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 hidden sm:flex flex-col w-70 bg-slate-100 border-r border-slate-200 text-slate-700">
+    <aside
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`fixed inset-y-0 left-0 z-50 hidden sm:flex flex-col bg-slate-100 border-r border-slate-200 text-slate-700 transition-all duration-300 ease-in-out ${
+        isOpen ? "w-70" : "w-20"
+      }`}
+    >
+      {/* PERSISTENT TOGGLE BUTTON (Arrow) */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsCollapsed(!isCollapsed);
+        }}
+        type="button"
+        className={`absolute top-6 -right-3.5 z-60 hidden sm:flex items-center justify-center w-7 h-7 bg-white border border-slate-200 rounded-full text-slate-500 hover:text-[#00aeef] hover:border-[#00aeef] shadow-xs hover:shadow-md cursor-pointer transition-all ${
+          isCollapsed ? "" : "rotate-180"
+        }`}
+        aria-label="Toggle Sidebar"
+      >
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </button>
+
       {/* BRANDING LOGO & HEADER AREA */}
-      <div className="flex items-center gap-3 px-5 py-6 border-b border-slate-200">
+      <div className={`flex items-center gap-3 px-5 py-6 border-b border-slate-200 transition-all duration-300 ${isOpen ? "justify-start" : "justify-center"}`}>
         <div className="flex items-center justify-center shrink-0">
           <img
             src={LogoDD}
@@ -177,18 +222,20 @@ export function Sidebar() {
             className="h-9 w-auto object-contain drop-shadow-xs"
           />
         </div>
-        <div>
-          <h1 className="text-sm font-black tracking-wide text-slate-800 uppercase leading-tight">
-            DOST HUB
-          </h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-            Northern Mindanao
-          </p>
-        </div>
+        {isOpen && (
+          <div className="animate-fadeIn">
+            <h1 className="text-sm font-black tracking-wide text-slate-800 uppercase leading-tight">
+              DOST HUB
+            </h1>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Northern Mindanao
+            </p>
+          </div>
+        )}
       </div>
 
       {/* NAVIGATION LINKS CONTAINER */}
-      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -196,6 +243,8 @@ export function Sidebar() {
             end={item.path === "/dashboard"}
             className={({ isActive }) =>
               `w-full flex items-center gap-3.5 px-4 py-3 text-xs font-bold rounded-xl transition-all duration-150 cursor-pointer text-left group ${
+                isOpen ? "justify-start px-4" : "justify-center px-0"
+              } ${
                 isActive
                   ? "bg-[#00aeef] text-white shadow-xs"
                   : "text-slate-800 hover:bg-slate-200/70 hover:text-cyan-brand"
@@ -205,7 +254,7 @@ export function Sidebar() {
             {({ isActive }) => (
               <>
                 <span
-                  className={`transition-colors duration-150 ${
+                  className={`transition-colors duration-150 shrink-0 ${
                     isActive
                       ? "text-white"
                       : "text-slate-500 group-hover:text-cyan-brand"
@@ -213,7 +262,7 @@ export function Sidebar() {
                 >
                   {item.icon}
                 </span>
-                {item.name}
+                {isOpen && <span className="animate-fadeIn truncate">{item.name}</span>}
               </>
             )}
           </NavLink>
@@ -221,14 +270,14 @@ export function Sidebar() {
       </nav>
 
       {/* NEW FOOTER SECTION: Dynamic Account Card & Toggle Menu */}
-      <div className="p-3 border-t border-slate-200 bg-slate-50/50">
-        <div className="flex flex-col gap-1">
+      <div className={`p-3 border-t border-slate-200 bg-slate-50/50 transition-all duration-300 ${isOpen ? "" : "flex justify-center"}`}>
+        <div className="flex flex-col gap-1 w-full">
           {/* Main Account Identity Card Component */}
           <button
-            onClick={() => setIsProfileExpanded(!isProfileExpanded)}
+            onClick={() => isOpen && setIsProfileExpanded(!isProfileExpanded)}
             type="button"
             className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer group ${
-              isProfileExpanded ? "bg-slate-200/80" : "hover:bg-slate-200/50"
+              !isOpen ? "justify-center p-1 bg-transparent hover:bg-slate-200/50" : isProfileExpanded ? "bg-slate-200/80" : "hover:bg-slate-200/50"
             }`}
           >
             <div className="flex items-center gap-3 min-w-0">
@@ -240,38 +289,42 @@ export function Sidebar() {
               </div>
 
               {/* Account Identity Strings */}
-              <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-slate-800 truncate leading-tight">
-                  {user?.name || "Active Session"}
-                </span>
-                <span className="text-[10px] font-semibold text-slate-400 truncate mt-0.5 uppercase tracking-wide">
-                  {user?.role || "user"} account
-                </span>
-              </div>
+              {isOpen && (
+                <div className="flex flex-col min-w-0 animate-fadeIn">
+                  <span className="text-xs font-bold text-slate-800 truncate leading-tight">
+                    {user?.name || "Active Session"}
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-400 truncate mt-0.5 uppercase tracking-wide">
+                    {user?.role || "user"} account
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Caret Down Arrow Indicator */}
-            <svg
-              className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ml-2 ${
-                isProfileExpanded
-                  ? "rotate-180 text-slate-600"
-                  : "group-hover:text-slate-600"
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            {isOpen && (
+              <svg
+                className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ml-2 ${
+                  isProfileExpanded
+                    ? "rotate-180 text-slate-600"
+                    : "group-hover:text-slate-600"
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            )}
           </button>
 
           {/* Collapsible Action Dropdown Drawer */}
-          {isProfileExpanded && (
+          {isOpen && isProfileExpanded && (
             <div className="px-1 pt-1 animate-fadeIn">
               <button
                 onClick={logout}
