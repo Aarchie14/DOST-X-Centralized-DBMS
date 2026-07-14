@@ -17,7 +17,7 @@ import { useLocation, useNavigate } from "react-router-dom"; // Added useLocatio
 export default function ProjectDatabase() {
   const location = useLocation(); // Hook to intercept the router state
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext)!;
+  const { user, addLog } = useContext(AuthContext)!;
   const lockedDepartment = getUnitLock(user) ?? undefined;
 
   // State to track the currently opened project database
@@ -142,7 +142,10 @@ export default function ProjectDatabase() {
                   formatCurrency={formatCurrency}
                   onOpenEditModal={handleOpenEditModal}
                   onDeleteRecord={handleOpenDeleteModal}
-                  onProjectClick={(project) => setSelectedProject(project)}
+                  onProjectClick={(project) => {
+                    setSelectedProject(project);
+                    addLog("Project Record Viewed", `Viewed detailed database of project: "${project.name}" (ID #${project.id})`);
+                  }}
                   selectedIds={selectedIds}
                   onToggleSelection={toggleSelection}
                   onToggleSelectAll={toggleSelectAll}

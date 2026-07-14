@@ -19,6 +19,12 @@
    - Modified `handleFileUpload` in `FileRepository.tsx` to automatically compute and format file sizes on client-side uploads.
    - Updated project documentation (`docs/user-guide.md`, `docs/CHANGELOG.md`) to reflect the new column and theme behavior.
 
+3. **Improved Activity Logging**
+   - Added logging support for viewing a detailed project database (`onProjectClick` in `ProjectDatabase.tsx`).
+   - Added logging support for exporting project database records to CSV/Excel (`handleExportCSV` and `handleExportExcel` in `useProjectDatabase.ts`).
+   - Added logging support for downloading files from the file repository (`handleDownload` in `FileRepository.tsx`).
+   - This ensures all actions by both administrators and standard staff users within these tables are fully recorded in the Activity Logs.
+
 ### What's Blocked
 
 - Nothing currently blocked.

@@ -203,6 +203,7 @@ const openModalImmediately = () => {
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const label = selectedIds.size > 0 ? `Selected_${selectedIds.size}` : "Standard";
     triggerDownload(blob, `${label}_Report.csv`);
+    addLog("Project Database Export", `Exported ${exportRecords.length} records to CSV (${label} report).`);
   };
 
 /** Exports data as an Excel-compatible XLS file */
@@ -243,6 +244,7 @@ const openModalImmediately = () => {
     const blob = new Blob([tableHtml], { type: "application/vnd.ms-excel;charset=utf-8;" });
     const label = selectedIds.size > 0 ? `Selected_${selectedIds.size}` : "Full";
     triggerDownload(blob, `${label}_Report.xls`);
+    addLog("Project Database Export", `Exported ${exportRecords.length} records to Excel (${label} report).`);
   };
 
 /** Browser utility to force download a blob file */

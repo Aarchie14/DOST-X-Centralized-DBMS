@@ -132,6 +132,7 @@ export default function FileRepository({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    addLog("File Downloaded", `Downloaded file: "${fileName}"`);
   };
 
   return (

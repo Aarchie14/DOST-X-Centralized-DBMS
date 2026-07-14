@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### Added
+- **Improved Activity Logging** — Added logging support for viewing detailed project record databases, exporting project data (CSV/Excel), and downloading repository files. Now, activities of all users (both admins and standard staff users) are fully recorded in the Activity Logs.
 - **File size tracking in File Repository** — Added file size field to `useFileRepository.ts` and `FileRepository.tsx`. Developed `src/utils/fileUtils.ts` formatting helper. Displays file size column in `FileTable.tsx` and dynamically computes file size upon file upload.
 - **Google Sans Flex font** — integrated system-wide via Google Fonts API and Tailwind v4 `@theme` block.
 - **Collapsible sidebar** — minimized by default, expands on hover, toggle arrow button to pin state; managed via `SidebarContext`.
