@@ -31,6 +31,19 @@ export const MIN_PASSWORD_LENGTH = 6;
 export const FAILURE_LIMIT = 5;
 export const LOCKOUT_MS = 30_000;
 
+export const BLOCKED_USER_NAMES = ["Planing Specialist", "Gender Analyst"] as const;
+
+const normalizeBlockedUserName = (name: string) =>
+  name.trim().toLowerCase();
+
+export const filterBlockedUsers = <T extends User>(users: T[]): T[] =>
+  users.filter((user) => {
+    const normalizedName = normalizeBlockedUserName(user.name);
+    return !BLOCKED_USER_NAMES.some(
+      (blockedName) => normalizedName === blockedName.toLowerCase(),
+    );
+  });
+
 export const INITIAL_USERS: User[] = [
   {
     email: "admin@dost.gov.ph",

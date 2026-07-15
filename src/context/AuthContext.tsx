@@ -9,6 +9,8 @@ import {
   LOCKOUT_MS,
   INITIAL_USERS,
   INITIAL_LOGS,
+  BLOCKED_USER_NAMES,
+  filterBlockedUsers,
 } from "../types/auth";
 import { readStorageJson, writeStorageJson } from "../utils/storage";
 import { sanitizeUserRecord } from "../utils/userSanitizer";
@@ -27,16 +29,44 @@ export const AuthContext = createContext<{
 } | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() =>
-    readStorageJson(sessionStorage, STORAGE_KEYS.sessionUser, null),
-  );
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = readStorageJson<User | null>(
+      sessionStorage,
+      STORAGE_KEYS.sessionUser,
+      null,
+    );
+    if (!savedUser) return null;
+
+    const normalizedSavedName = savedUser.name.trim().toLowerCase();
+    if (
+      BLOCKED_USER_NAMES.some(
+        (blockedName) => normalizedSavedName === blockedName.toLowerCase(),
+      )
+    ) {
+      sessionStorage.removeItem(STORAGE_KEYS.sessionUser);
+      return null;
+    }
+
+    return sanitizeUserRecord(savedUser);
+  });
   const [loading, setLoading] = useState(true);
 
-  const [users, setUsers] = useState<User[]>(() =>
-    readStorageJson(localStorage, STORAGE_KEYS.usersList, INITIAL_USERS).map(
-      sanitizeUserRecord,
-    ),
-  );
+  const [users, setUsers] = useState<User[]>(() => {
+    const storedUsers = readStorageJson<User[]>(
+      localStorage,
+      STORAGE_KEYS.usersList,
+      INITIAL_USERS,
+    );
+    const sanitizedUsers = filterBlockedUsers(
+      storedUsers.map(sanitizeUserRecord),
+    );
+
+    if (storedUsers.length !== sanitizedUsers.length) {
+      writeStorageJson(localStorage, STORAGE_KEYS.usersList, sanitizedUsers);
+    }
+
+    return sanitizedUsers;
+  });
 
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() =>
     readStorageJson(localStorage, STORAGE_KEYS.activityLogs, INITIAL_LOGS),
@@ -148,6 +178,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const addUser = (newUser: User) => {
     const normalizedUser = sanitizeUserRecord(newUser);
+
+    const normalizedNewName = normalizedUser.name.trim().toLowerCase();
+    if (
+      BLOCKED_USER_NAMES.some(
+        (blockedName) => normalizedNewName === blockedName.toLowerCase(),
+      )
+    ) {
+      return;
+    }
 
     setUsers((prev) => {
       const alreadyExists = prev.some(
