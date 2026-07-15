@@ -16,7 +16,8 @@ interface FileRecord {
 interface FileTableProps {
   files: FileRecord[];
   onDelete: (id: number, name: string) => void;
-  onDownload: (fileName: string) => void;
+  /** Called with (fileName, fileId) so the backend download endpoint can be called. */
+  onDownload: (fileName: string, fileId: number) => void;
   userRole?: "admin" | "user";
 }
 
@@ -75,7 +76,7 @@ export function FileTable({
               <td className="px-6 py-2 text-center">
                 <div className="flex items-center justify-center gap-3">
                   <button
-                    onClick={() => onDownload(file.fileName)}
+                    onClick={() => onDownload(file.fileName, file.id)}
                     className="text-slate-400 hover:text-[#00aeef] transition-colors"
                   >
                     <svg

@@ -1,6 +1,7 @@
 export type Permission = "read" | "write" | "delete" | "manage_users" | "edit_records";
 
 export type User = {
+  id?: number;
   email: string;
   role: "admin" | "user";
   name: string;

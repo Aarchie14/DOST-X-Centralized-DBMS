@@ -1,60 +1,80 @@
-import { Navbar } from "../components/layout/Navbar";
-import { Sidebar } from "../components/layout/Sidebar";
-import { TableToolbar } from "../components/common/TableToolbar";
-import { FileUploadZone } from "../components/common/FileUploadZone";
-import { FileTable } from "../components/common/FileTable";
-import { Toast, type ToastNotification } from "../components/common/Toast";
-import { DeleteConfirmModal } from "../components/common/DeleteConfirmModal";
-import { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { scopeToUnit, getUnitLock, resolveInitialDepartment } from "../utils/unitAccess";
-import { formatFileSize } from "../utils/fileUtils";
+/**
+ * FileRepository.tsx
+ *
+ * Departmental file repository page.
+ *
+ * v2 – Backend Integration
+ * ─────────────────────────
+ * Files are fetched from GET /files on mount.
+ * Uploads POST to /files as multipart/form-data (with department + sector_category).
+ * Downloads stream via GET /files/:id/download through the backend.
+ * Deletions call DELETE /files/:id.
+ *
+ * Department and sector_category metadata from the backend replace the
+ * previous hard-coded sectorCategory field ("Uploaded").
+ */
 
-export default function FileRepository({
-}) {
-  // 1. AuthContext Hook to access user role, logging, and authentication functions
+import { Navbar }            from "../components/layout/Navbar";
+import { Sidebar }           from "../components/layout/Sidebar";
+import { TableToolbar }      from "../components/common/TableToolbar";
+import { FileUploadZone }    from "../components/common/FileUploadZone";
+import { FileTable }         from "../components/common/FileTable";
+import { Toast, type ToastNotification } from "../components/common/Toast";
+import { DeleteConfirmModal} from "../components/common/DeleteConfirmModal";
+import { useState, useContext, useEffect, useCallback } from "react";
+import { AuthContext }       from "../context/AuthContext";
+import {
+  scopeToUnit,
+  getUnitLock,
+  resolveInitialDepartment,
+} from "../utils/unitAccess";
+import { formatFileSize }    from "../utils/fileUtils";
+import { api, type ApiFile } from "../utils/api";
+
+// ---------------------------------------------------------------------------
+// Helper: map backend ApiFile → local display shape
+// ---------------------------------------------------------------------------
+interface FileRecord {
+  id:             number;
+  fileName:       string;
+  fileSize:       string;
+  department:     string;
+  sectorCategory: string;
+  lastAccessed:   string;
+}
+
+function mapApiFile(f: ApiFile): FileRecord {
+  return {
+    id:             f.id,
+    fileName:       f.original_name,
+    fileSize:       formatFileSize(f.file_size),
+    department:     f.department ?? "MIS",
+    sectorCategory: f.sector_category ?? "Uploaded",
+    lastAccessed:   new Date(f.uploaded_at)
+      .toLocaleDateString("en-GB")
+      .replace(/\//g, "-"),
+  };
+}
+
+export default function FileRepository() {
+  // AuthContext
   const { user, addLog } = useContext(AuthContext)!;
-  const lockedDepartment = getUnitLock(user) ?? undefined;
+  const lockedDepartment  = getUnitLock(user) ?? undefined;
 
   // STATE HOOKS
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState(() =>
+  const [searchQuery,         setSearchQuery]         = useState("");
+  const [selectedDepartment,  setSelectedDepartment]  = useState(() =>
     resolveInitialDepartment(user, "All department"),
   );
-  const [currentPage, setCurrentPage] = useState(1);
-  const [notification, setNotification] = useState<ToastNotification | null>(
-    null,
-  );
-
-  // State for the delete modal
-  const [fileToDelete, setFileToDelete] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
-
-  const [files, setFiles] = useState([
-    {
-      id: 1,
-      fileName: "SETUP Food Processing Facility Upgrade.csv",
-      fileSize: "124.5 KB",
-      department: "MIS",
-      sectorCategory: "SETUP (MSMEs)",
-      lastAccessed: "07-07-2026",
-    },
-    {
-      id: 2,
-      fileName: "S&T_Scholarship(2025-2026).xlsx",
-      fileSize: "1.2 MB",
-      department: "SCC",
-      sectorCategory: "Scholarship",
-      lastAccessed: "07-07-2026",
-    },
-  ]);
+  const [currentPage,   setCurrentPage]   = useState(1);
+  const [notification,  setNotification]  = useState<ToastNotification | null>(null);
+  const [fileToDelete,  setFileToDelete]  = useState<{ id: number; name: string } | null>(null);
+  const [files,         setFiles]         = useState<FileRecord[]>([]);
+  const [isLoading,     setIsLoading]     = useState(false);
 
   const ITEMS_PER_PAGE = 10;
 
   // --- TOAST UTILITIES ---
-  /** Triggers a transient notification message */
   const triggerToast = (
     message: string,
     type: "success" | "error" | "info" = "info",
@@ -63,7 +83,28 @@ export default function FileRepository({
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // 2. DERIVED DATA
+  // ---------------------------------------------------------------------------
+  // Fetch files from backend on mount / after search changes
+  // ---------------------------------------------------------------------------
+  const fetchFiles = useCallback(async (search?: string) => {
+    try {
+      setIsLoading(true);
+      const { files: apiFiles } = await api.getFiles(search);
+      setFiles(apiFiles.map(mapApiFile));
+    } catch (err) {
+      console.error("Failed to load files:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchFiles();
+  }, [fetchFiles]);
+
+  // ---------------------------------------------------------------------------
+  // Derived Data
+  // ---------------------------------------------------------------------------
   const visibleFiles = scopeToUnit(files, user);
 
   const filteredFiles = visibleFiles.filter((file) => {
@@ -76,42 +117,54 @@ export default function FileRepository({
     return matchesSearch && matchesDept;
   });
 
-  const indexOfLastFile = currentPage * ITEMS_PER_PAGE;
+  const indexOfLastFile  = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstFile = indexOfLastFile - ITEMS_PER_PAGE;
-  const currentFiles = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
+  const currentFiles     = filteredFiles.slice(indexOfFirstFile, indexOfLastFile);
 
-  // --- HANDLERS ---
-  /** Adds a new file to the state and resets view */
-  const handleFileUpload = (file: File, department: string) => {
-    const newFile = {
-      id: Date.now(),
-      fileName: file.name,
-      fileSize: formatFileSize(file.size),
-      department: department,
-      sectorCategory: "Uploaded",
-      lastAccessed: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
-    };
-    setFiles((prevFiles) => [newFile, ...prevFiles]);
-    triggerToast(`"${file.name}" uploaded to ${department}`, "success");
-    addLog("File Uploaded", `Uploaded file: "${file.name}" to ${department} department`);
-    setCurrentPage(1);
+  // ---------------------------------------------------------------------------
+  // HANDLERS
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Uploads a file to the backend (multipart/form-data) with department metadata.
+   * On success, prepends the new file to local state so the UI updates instantly.
+   */
+  const handleFileUpload = async (file: File, department: string) => {
+    try {
+      const result = await api.uploadFile(file, { department, sector_category: "Uploaded" });
+      const newFile: FileRecord = {
+        id:             result.id,
+        fileName:       file.name,
+        fileSize:       formatFileSize(file.size),
+        department,
+        sectorCategory: "Uploaded",
+        lastAccessed:   new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
+      };
+      setFiles((prev) => [newFile, ...prev]);
+      triggerToast(`"${file.name}" uploaded to ${department}`, "success");
+      addLog("File Uploaded", `Uploaded file: "${file.name}" to ${department} department`);
+      setCurrentPage(1);
+    } catch (err: any) {
+      triggerToast(err.message || "Upload failed", "error");
+    }
   };
 
-  // Trigger the modal instead of deleting
-  const initiateDelete = (id: number, name: string) => {
+  /** Opens delete confirmation modal */
+  const initiateDelete = (id: number, name: string) =>
     setFileToDelete({ id, name });
-  };
 
-  // Actual deletion logic
-  const confirmDelete = () => {
-    if (fileToDelete) {
-      setFiles((prevFiles) =>
-        prevFiles.filter((file) => file.id !== fileToDelete.id),
-      );
+  /** Deletes file via backend API then removes from local state */
+  const confirmDelete = async () => {
+    if (!fileToDelete) return;
+    try {
+      await api.deleteFile(fileToDelete.id);
+      setFiles((prev) => prev.filter((f) => f.id !== fileToDelete.id));
       triggerToast("File deleted successfully", "error");
       addLog("File Deleted", `Deleted file: "${fileToDelete.name}"`);
-      setFileToDelete(null);
+    } catch (err: any) {
+      triggerToast(err.message || "Delete failed", "error");
     }
+    setFileToDelete(null);
   };
 
   const handleSearchChange = (val: string) => {
@@ -124,15 +177,21 @@ export default function FileRepository({
     setCurrentPage(1);
   };
 
-  /** Programmatically triggers a browser file download */
-  const handleDownload = (fileName: string) => {
-    const link = document.createElement("a");
-    link.href = `/files/${fileName}`;
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    addLog("File Downloaded", `Downloaded file: "${fileName}"`);
+  /**
+   * Downloads a file from the backend server via GET /files/:id/download.
+   * The backend streams the stored file; the browser prompts a save dialog.
+   */
+  const handleDownload = async (fileName: string, fileId?: number) => {
+    if (fileId == null) {
+      triggerToast("Cannot determine file ID for download", "error");
+      return;
+    }
+    try {
+      await api.downloadFile(fileId, fileName);
+      addLog("File Downloaded", `Downloaded file: "${fileName}"`);
+    } catch (err: any) {
+      triggerToast(err.message || "Download failed", "error");
+    }
   };
 
   return (
@@ -163,6 +222,13 @@ export default function FileRepository({
             lockedDepartment={lockedDepartment}
           />
 
+          {/* Loading indicator */}
+          {isLoading && (
+            <p className="text-xs text-slate-400 text-center py-4">
+              Loading files…
+            </p>
+          )}
+
           {/* SECTION: File Listing Table */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[630px] overflow-hidden">
             <div className="flex-1 overflow-hidden">
@@ -170,7 +236,7 @@ export default function FileRepository({
                 userRole={user?.role}
                 files={currentFiles}
                 onDelete={initiateDelete}
-                onDownload={handleDownload}
+                onDownload={(fileName, fileId) => handleDownload(fileName, fileId)}
               />
             </div>
           </div>

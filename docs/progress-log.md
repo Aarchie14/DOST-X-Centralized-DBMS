@@ -4,7 +4,54 @@
 
 ---
 
+## 2026-07-15 — Backend/Frontend API Integration
+
+### What Shipped
+
+1. **Backend Schema Extended**
+   - `alter_schema.js` added to the `dost-backend` project to safely add new columns to existing tables without dropping data.
+   - `users` table: added `email` (VARCHAR UNIQUE), `department` (VARCHAR), `system_access` (JSON).
+   - `datasets` table: added `department`, `sector_category`, `budget`, `status`, `last_accessed`.
+   - `files` table: added `department`, `sector_category`.
+   - `migrate.js` updated with the extended schema for fresh installations.
+
+2. **Backend Controllers Updated**
+   - `authController.js`: login now queries `WHERE username = ? OR email = ?` and returns `department` and `system_access` in the JWT payload and response.
+   - `userController.js`: `listUsers`, `createUser`, `updateUser` now handle `email`, `department`, and `system_access`.
+   - `datasetController.js`: `listDatasets`, `createDataset`, `updateDataset` now handle `department`, `sector_category`, `budget`, `status`, `last_accessed`.
+   - `fileController.js`: `listFiles` and `uploadFile` now handle `department` and `sector_category`.
+
+3. **Frontend API Layer Created**
+   - `src/utils/api.ts`: central fetch wrapper auto-attaching JWT from `localStorage`. Covers all endpoints: auth, users, roles, datasets, records, files, dashboard, audit logs.
+
+4. **Frontend Contexts and Hooks Wired to Backend**
+   - `AuthContext.tsx` rewired: login calls `POST /auth/login`, user CRUD calls `/users` endpoints, JWT saved in `localStorage`.
+   - `LoginPage.tsx`: single identifier field accepts username OR email.
+   - `useProjectDatabase.ts`: loads from `GET /datasets`; CRUD via `POST / PUT / DELETE /datasets`.
+   - `useDatabaseView.ts`: loads from `GET /datasets/:id/records`; CRUD via records endpoints.
+   - `FileRepository.tsx`: fetches `GET /files`, uploads to `POST /files` (multipart + department), downloads via `GET /files/:id/download`, deletes via `DELETE /files/:id`.
+   - `FileTable.tsx`: `onDownload` prop updated to pass `(fileName, fileId)`.
+
+5. **TypeScript Validation**
+   - `npx tsc --noEmit` passes with zero errors after all integration changes.
+
+6. **Session & Profile Synchronization Fixes**
+   - Refactored `AuthContext.tsx` mount effect to sequentially synchronize session state with the backend database (`api.me()`). This fixes page refresh inconsistencies in the User Management tab and retrieves the latest user profile updates dynamically.
+   - Allowed standard users to update their own profiles (e.g., editing their display name) on `PUT /users/:id` by adding self-update permissions check on the backend router and updating `userController.js` to secure administrative fields.
+   - Added database `id` mapping to the frontend `User` model to allow standard users to perform self-profile updates seamlessly.
+
+### What's Blocked
+- None.
+
+### Planned Next
+- Seed additional test users with `email`, `department`, and `system_access` in the backend database.
+- Wire `Dashboard.tsx` statistics cards to `GET /dashboard`.
+- Wire Activity Logs page to `GET /audit-logs` for backend-persisted log entries.
+
+---
+
 ## 2026-07-15 — Default Light Mode + File Size Tracking
+
 
 ### What Shipped
 

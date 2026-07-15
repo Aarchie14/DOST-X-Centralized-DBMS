@@ -2,7 +2,6 @@ import { useState, useEffect, useContext, type FormEvent } from "react";
 import { AuthContext } from "../context/AuthContext";
 import LogoCW from "../assets/LogoCW.png";
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * LoginPage Component
@@ -13,7 +12,7 @@ export default function LoginPage() {
   const { login } = useContext(AuthContext)!;
 
   // --- STATE HOOKS ---
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // username OR email
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -36,57 +35,26 @@ export default function LoginPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const trimmedPassword = password.trim();
+    const trimmedId  = identifier.trim();
+    const trimmedPwd = password.trim();
 
-    if (!EMAIL_PATTERN.test(normalizedEmail)) {
-      setErrorMessage("Please enter a valid email address.");
+    if (!trimmedId) {
+      setErrorMessage("Please enter your username or email address.");
       return;
     }
 
-    if (trimmedPassword.length < 6) {
+    if (trimmedPwd.length < 6) {
       setErrorMessage("Password must be at least 6 characters long.");
-      return;
-    }
-
-    const lockoutUntil = Number(
-      sessionStorage.getItem("login_lockout_until") || "0",
-    );
-    if (Date.now() < lockoutUntil) {
-      const remainingSeconds = Math.max(
-        1,
-        Math.ceil((lockoutUntil - Date.now()) / 1000),
-      );
-      setErrorMessage(
-        `Too many failed attempts. Please try again in ${remainingSeconds}s.`,
-      );
       return;
     }
 
     setIsLoading(true);
     setErrorMessage("");
 
-    const success = await login(normalizedEmail, trimmedPassword);
+    const success = await login(trimmedId, trimmedPwd);
 
     if (!success) {
-      const isLocked =
-        Number(sessionStorage.getItem("login_lockout_until") || "0") >
-        Date.now();
-      if (isLocked) {
-        const remainingSeconds = Math.max(
-          1,
-          Math.ceil(
-            (Number(sessionStorage.getItem("login_lockout_until") || "0") -
-              Date.now()) /
-              1000,
-          ),
-        );
-        setErrorMessage(
-          `Too many failed attempts. Please try again in ${remainingSeconds}s.`,
-        );
-      } else {
-        setErrorMessage("Invalid credentials. Please try again.");
-      }
+      setErrorMessage("Invalid credentials. Please try again.");
       setIsLoading(false);
     }
   };
@@ -120,15 +88,15 @@ export default function LoginPage() {
         <div className="space-y-4">
           <div className="text-left">
             <label className="text-white text-xs font-bold ml-1 mb-1 block">
-              Email
+              Username or Email
             </label>
             <input
               required
-              placeholder="Enter your email"
-              type="email"
+              placeholder="Enter your username or email"
+              type="text"
               autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               className="w-full px-4 py-2 rounded-md bg-white/90 focus:outline-none focus:ring-2 focus:ring-sky-300"
             />
           </div>
